@@ -25,8 +25,8 @@ public class exercises {
 
     private final String exerciseDescription = "C:\\Users\\Tiffany\\Desktop\\ags10e\\exercisedescription\\";
     private String header1;
-    private String selectedName = "3";
-    private String selectedExercise;
+    private String selectedName = "1";
+    private String selectedExercise = "1";
     private List<SelectItem> names;
     private List<SelectItem> exes;
 

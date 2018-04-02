@@ -10,7 +10,6 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
-import javax.enterprise.context.RequestScoped;
 import javax.faces.bean.ManagedBean;
 import javax.faces.model.SelectItem;
 
@@ -26,9 +25,10 @@ public class exercises {
     private final String exerciseDescription = "C:\\Users\\Tiffany\\Desktop\\ags10e\\exercisedescription\\";
     private String header1;
     private String selectedName = "1";
-    private String selectedExercise = "1";
+    private String selectedExercise = "Exercise03_01";
     private List<SelectItem> names;
     private List<SelectItem> exes;
+    private String program;
 
     @PostConstruct
     public void init() {
@@ -52,9 +52,9 @@ public class exercises {
                 }
             }
         }
-        header1 = "CheckExercise: " + exes.get(0).getValue() +  ".java";
+        header1 = "CheckExercise: " + selectedExercise + ".java";
     }
-    
+
     public void updateExes(String numb) {
         File folder = new File(exerciseDescription);
         File[] listOfFiles = folder.listFiles();
@@ -107,6 +107,20 @@ public class exercises {
 
     public List<SelectItem> getExes() {
         return exes;
+    }
+
+    public String getProgram() {
+        program = "/* Paste your " + selectedExercise + " here and click Automatic Check. \n"
+                + "For all programming projects, the numbers should be double \n"
+                + "unless it is explicitly stated as integer. \n"
+                + "If you get a java.util.InputMismatchException error, check if \n"
+                + "your code used input.readInt(), but it should be input.readDouble(). \n"
+                + "For integers, use int unless it is explicitly stated as long. */";
+        return program;
+    }
+
+    public void setProgram(String program) {
+        this.program = program;
     }
 
 }

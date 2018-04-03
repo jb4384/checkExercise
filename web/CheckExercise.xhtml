@@ -4,7 +4,7 @@
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="http://xmlns.jcp.org/jsf/core">
     <h:head>
-        <link type="text/css" rel="stylesheet" href="/CheckExercise/faces/javax.faces.resource/theme.css?ln=primefaces-aristo" />
+        <!--<link type="text/css" rel="stylesheet" href="/CheckExercise/faces/javax.faces.resource/theme.css?ln=primefaces-aristo" />-->
         <script type="text/javascript" src="/CheckExercise/faces/javax.faces.resource/jsf.js?ln=javax.faces"></script>
         <title>Check Exercises by Joshua Barney, Keyur Patel, and Tiffany Tran</title>
         <style>
@@ -170,7 +170,8 @@
                                                             <h:outputLabel>Choose a Chapter:</h:outputLabel>
                                                         </td>
                                                         <td>
-                                                            <h:selectOneMenu id="chapters" value="#{exercises.selectedName}" onchange="#{exercises.submit()}">
+                                                            <h:selectOneMenu id="chapters" value="#{exercises.selectedName}" valueChangeListener="#{exercises.changeSelectedName}" 
+                                                                    onchange="submit()">
                                                                 <f:selectItems value="#{exercises.names}" />
                                                             </h:selectOneMenu>
                                                         </td>
@@ -245,7 +246,6 @@
                     </tr>
                 </tbody>
             </table>
-            <input type="hidden" name="javax.faces.ViewState" id="j_id1:javax.faces.ViewState:0" value="-22604929532841258:-3041975342397128129"/>
         </h:form>
     </h:body>
 </html>

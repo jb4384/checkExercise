@@ -11,12 +11,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 import javax.faces.bean.ManagedBean;
 import javax.faces.context.FacesContext;
+import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 
 /**
@@ -28,60 +31,67 @@ import javax.faces.model.SelectItem;
 @ApplicationScoped
 public class exercises {
 
-    private final String exerciseDescription = "/exercisedescription/";
     private String header1;
-    private String selectedName = "1";
-    private String selectedExercise = "Exercise03_01";
+    private String selectedName = "01";
+    private String selectedExercise = "";
+    Set<Integer> chapters;
     private List<SelectItem> names;
     private List<SelectItem> exes;
+    private List<File> files;
     private String program;
 
     @PostConstruct
     public void init() {
-        String webinf = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/WEB-INF");
-        String ags10e = new File(webinf + "/../../../ags10e").toString();
-        names = new ArrayList<>();
-        exes = new ArrayList<>();
-        for (int i = 1; i < 44; i++) {
-            names.add(new SelectItem("" + i, "Chapter " + i));
-        }
-        if (selectedName.length() < 2) selectedName =  "0" + selectedName;
-
-        try {
-            List<File> files = Files.walk(Paths.get(ags10e + exerciseDescription))
-                    .filter(Files::isRegularFile)
-                    .map(Path::toFile)
-                    .filter(file -> file.getName().startsWith("Exercise"+selectedName))
-                    .collect(Collectors.toList());
-            files.forEach((File file) -> {
-                exes.add(new SelectItem("" + file.getName(), file.getName()));
-            });
-        } catch (IOException ex) {
-            System.out.println("failed");
-        }
+        buildChapters();
+        updateExes();
         header1 = "CheckExercise: " + selectedExercise + ".java";
     }
 
-    public void updateExes(String numb) {
-        File folder = new File(exerciseDescription);
-        File[] listOfFiles = folder.listFiles();
-        int num = Integer.parseInt(numb);
-        for (File file : listOfFiles) {
-            if (num < 10) {
-                if (file.getName().startsWith("Exercise0" + num + "_")) {
-                    exes.add(new SelectItem("" + file.getName(), file.getName()));
-                }
-            } else {
-                if (file.getName().startsWith("Exercise" + num + "_")) {
-                    exes.add(new SelectItem("" + file.getName(), file.getName()));
-                }
-            }
+    public void buildChapters() {
+        names = new ArrayList<>();
+        chapters = new TreeSet<>();
+        try {
+            String webinf = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/WEB-INF");
+            String ags10e = new File(webinf + "/../../../ags10e").toString();
+            files = Files.walk(Paths.get(ags10e + "/exercisedescription/"))
+                    .filter(Files::isRegularFile)
+                    .map(Path::toFile)
+                    .collect(Collectors.toList());
+            files.forEach((File file) -> {
+                String ch = file.getName().split("_")[0].trim().replaceAll("[^0-9]","");
+                chapters.add(Integer.parseInt(ch));
+            });
+        } catch (IOException ex) {
+            System.out.println("failed build chapters");
         }
+        chapters.forEach(ch -> {
+            names.add(new SelectItem("" + ch, "Chapter " + ch));
+        });
     }
 
-    public void submit() {
-        header1 = "CheckExercise: Exercise01_01.java";
-        System.out.println("Selected item: ");
+    public void updateExes() {
+        exes = new ArrayList<>();
+        buildFiles("/exercisedescription/");
+        files.forEach((File file) -> {
+            if (selectedExercise.isEmpty()) {
+                selectedExercise = file.getName();
+            }
+            exes.add(new SelectItem("" + file.getName(), file.getName()));
+        });
+    }
+
+    public void buildFiles(String endPath) {
+        try {
+            String webinf = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/WEB-INF");
+            String ags10e = new File(webinf + "/../../../ags10e").toString();
+            files = Files.walk(Paths.get(ags10e + endPath))
+                    .filter(Files::isRegularFile)
+                    .map(Path::toFile)
+                    .filter(file -> file.getName().startsWith("Exercise" + selectedName))
+                    .collect(Collectors.toList());
+        } catch (IOException ex) {
+            System.out.println("failed");
+        }
     }
 
     public String getHeader1() {
@@ -90,6 +100,7 @@ public class exercises {
 
     public void setHeader1(String header1) {
         this.header1 = header1;
+        updateExes();
     }
 
     public String getSelectedName() {
@@ -98,6 +109,14 @@ public class exercises {
 
     public void setSelectedName(String selectedName) {
         this.selectedName = selectedName;
+    }
+
+    public void changeSelectedName(ValueChangeEvent event) {
+        selectedName = event.getNewValue().toString();
+        if (selectedName.length() < 2) {
+            selectedName = "0" + selectedName;
+        }
+        updateExes();
     }
 
     public String getSelectedExercise() {

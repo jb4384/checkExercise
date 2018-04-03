@@ -154,7 +154,7 @@
                 <tbody>
                     <tr>
                         <td>
-                            <h:outputLabel value="#{exercises.header1}" style="width:100%; margin-right: 0 auto;" class="header"/>
+                            <h:outputLabel value="CheckExercise: #{exercises.header1}.java" style="width:100%; margin-right: 0 auto;" class="header"/>
                         </td>
                     </tr>
                     <tr>
@@ -180,7 +180,8 @@
                                                         </td>
                                                         <td>
                                                             <!-- FIX EXERCISES HERE -->
-                                                            <h:selectOneMenu id="exercises" value="#{exercises.selectedExercise}">
+                                                            <h:selectOneMenu id="exercises" value="#{exercises.selectedExercise}" valueChangeListener="#{exercises.changeSelectedExercise}"
+                                                                             onchange="submit()">
                                                                 <f:selectItems value="#{exercises.exes}" />
                                                             </h:selectOneMenu>
                                                         </td>

@@ -6,6 +6,7 @@
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
@@ -39,26 +41,29 @@ public class exercises {
     private List<SelectItem> exes;
     private List<File> files;
     private String program;
+    String webinf;
+    String ags10e;
 
     @PostConstruct
     public void init() {
+        webinf = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/WEB-INF");
+        ags10e = new File(webinf + "/../../../ags10e").toString();
         buildChapters();
         updateExes();
-        header1 = "CheckExercise: " + selectedExercise + ".java";
+        header1 = selectedExercise;
+        updateProgram();
     }
 
     public void buildChapters() {
         names = new ArrayList<>();
         chapters = new TreeSet<>();
         try {
-            String webinf = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/WEB-INF");
-            String ags10e = new File(webinf + "/../../../ags10e").toString();
             files = Files.walk(Paths.get(ags10e + "/exercisedescription/"))
                     .filter(Files::isRegularFile)
                     .map(Path::toFile)
                     .collect(Collectors.toList());
             files.forEach((File file) -> {
-                String ch = file.getName().split("_")[0].trim().replaceAll("[^0-9]","");
+                String ch = file.getName().split("_")[0].trim().replaceAll("[^0-9]", "");
                 chapters.add(Integer.parseInt(ch));
             });
         } catch (IOException ex) {
@@ -82,8 +87,6 @@ public class exercises {
 
     public void buildFiles(String endPath) {
         try {
-            String webinf = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/WEB-INF");
-            String ags10e = new File(webinf + "/../../../ags10e").toString();
             files = Files.walk(Paths.get(ags10e + endPath))
                     .filter(Files::isRegularFile)
                     .map(Path::toFile)
@@ -127,6 +130,10 @@ public class exercises {
         this.selectedExercise = selectedExercise;
     }
 
+    public void changeSelectedExercise(ValueChangeEvent event) {
+        selectedExercise = event.getNewValue().toString();
+    }
+
     public List<SelectItem> getNames() {
         return names;
     }
@@ -136,12 +143,6 @@ public class exercises {
     }
 
     public String getProgram() {
-        program = "/* Paste your " + selectedExercise + " here and click Automatic Check. \n"
-                + "For all programming projects, the numbers should be double \n"
-                + "unless it is explicitly stated as integer. \n"
-                + "If you get a java.util.InputMismatchException error, check if \n"
-                + "your code used input.readInt(), but it should be input.readDouble(). \n"
-                + "For integers, use int unless it is explicitly stated as long. */";
         return program;
     }
 
@@ -149,4 +150,30 @@ public class exercises {
         this.program = program;
     }
 
+    private void updateProgram() {
+        program = "";
+        String fileName = ags10e + "/exercisedescription/" + selectedExercise;
+        File f = new File(fileName);
+        if (f.exists() && !f.isDirectory()) {
+            try (Stream<String> lines = Files.lines(Paths.get(fileName), StandardCharsets.ISO_8859_1)) {
+                lines.forEach((String line) -> {
+                    line = line.replaceAll("[\\u2018\\u2019]", "'")
+                            .replaceAll("[\\u201C\\u201D]", "\"");
+                    if (!program.isEmpty()) {
+                        program += "\n";
+                    }
+                    program += line;
+                });
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+        } else {
+            System.out.println("Invalid file program build!");
+        }
+    }
+    
+    public void submit(){
+        header1 = selectedName;
+        updateProgram();
+    }
 }

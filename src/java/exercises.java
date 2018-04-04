@@ -152,7 +152,20 @@ public class exercises {
         program = "";
         String fileName = ags10e + "/exercisedescription/" + header1;
         parseFile(fileName);
-        program = fileInfo;
+        if (fileInfo.replaceAll("[^A-Za-z ]", "").trim().equalsIgnoreCase("programming exercise")){
+            program = "/* Paste your "+header1+" here and click Automatic Check.\n"
+                    + "For all programming projects, the numbers should be double\n"
+                    + "unless it is explicitly stated as integer.\n"
+                    + "If you get a java.util.InputMismatchException error, check if\n"
+                    + "your code used input.readInt(), but it should be input.readDouble().\n"
+                    + "For integers, use int unless it is explicitly stated as long. */";
+        } else if(fileInfo.equalsIgnoreCase("This exercise can be compiled and submitted, but cannot be run and automatically graded.")) {
+            program = "/* This exercise cannot be graded automatically becuase it may use random\n"
+                    + "numbers, file input/output, or graphics. */";
+        }else {
+            program = "/* " + fileInfo + " */";
+       }
+        
     }
 
     public String getOutput() {

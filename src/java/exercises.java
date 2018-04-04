@@ -41,8 +41,11 @@ public class exercises {
     private List<SelectItem> exes;
     private List<File> files;
     private String program;
-    String webinf;
-    String ags10e;
+    private String output;
+    private String input;
+    private String webinf;
+    private String ags10e;
+    private String fileInfo;
 
     @PostConstruct
     public void init() {
@@ -57,18 +60,11 @@ public class exercises {
     public void buildChapters() {
         names = new ArrayList<>();
         chapters = new TreeSet<>();
-        try {
-            files = Files.walk(Paths.get(ags10e + "/exercisedescription/"))
-                    .filter(Files::isRegularFile)
-                    .map(Path::toFile)
-                    .collect(Collectors.toList());
-            files.forEach((File file) -> {
-                String ch = file.getName().split("_")[0].trim().replaceAll("[^0-9]", "");
-                chapters.add(Integer.parseInt(ch));
-            });
-        } catch (IOException ex) {
-            System.out.println("failed build chapters");
-        }
+        buildFiles("/exercisedescription/", "");
+        files.forEach((File file) -> {
+            String ch = file.getName().split("_")[0].trim().replaceAll("[^0-9]", "");
+            chapters.add(Integer.parseInt(ch));
+        });
         chapters.forEach(ch -> {
             names.add(new SelectItem("" + ch, "Chapter " + ch));
         });
@@ -76,7 +72,7 @@ public class exercises {
 
     public void updateExes() {
         exes = new ArrayList<>();
-        buildFiles("/exercisedescription/");
+        buildFiles("/exercisedescription/", "Exercise" + selectedName);
         files.forEach((File file) -> {
             if (selectedExercise.isEmpty()) {
                 selectedExercise = file.getName();
@@ -85,12 +81,14 @@ public class exercises {
         });
     }
 
-    public void buildFiles(String endPath) {
+    public void buildFiles(String endPath, String startsWith) {
         try {
+            System.out.println(startsWith);
+            System.out.println(endPath);
             files = Files.walk(Paths.get(ags10e + endPath))
                     .filter(Files::isRegularFile)
                     .map(Path::toFile)
-                    .filter(file -> file.getName().startsWith("Exercise" + selectedName))
+                    .filter(file -> file.getName().startsWith(startsWith))
                     .collect(Collectors.toList());
         } catch (IOException ex) {
             System.out.println("failed");
@@ -152,28 +150,76 @@ public class exercises {
 
     private void updateProgram() {
         program = "";
-        String fileName = ags10e + "/exercisedescription/" + selectedExercise;
+        String fileName = ags10e + "/exercisedescription/" + header1;
+        parseFile(fileName);
+        program = fileInfo;
+    }
+
+    public String getOutput() {
+        return output;
+    }
+
+    public void setOutput(String output) {
+        this.output = output;
+    }
+
+    public String getInput() {
+        return input;
+    }
+
+    public void setInput(String input) {
+        this.input = input;
+    }
+
+    private void updateInfo() {
+        output = "";
+        input = "";
+        System.out.println("update file info");
+        System.out.println();
+        System.out.println();
+        buildFiles("/gradeexercise/", header1);
+        files.forEach((File file) -> {
+            String fileName = file.getAbsolutePath();
+            System.out.println(fileName);
+            parseFile(fileName);
+            if (fileName.endsWith("output")) {
+                if(!output.isEmpty()) output += "#";
+                output += fileInfo;
+            }
+            if (fileName.endsWith("input")) {
+                if(!input.isEmpty()) input += " ";
+                input += fileInfo;
+            }
+
+        });
+        System.out.println("output: " + output);
+        System.out.println("input: " + input);
+    }
+
+    private void parseFile(String fileName) {
+        fileInfo = "";
         File f = new File(fileName);
         if (f.exists() && !f.isDirectory()) {
             try (Stream<String> lines = Files.lines(Paths.get(fileName), StandardCharsets.ISO_8859_1)) {
                 lines.forEach((String line) -> {
                     line = line.replaceAll("[\\u2018\\u2019]", "'")
                             .replaceAll("[\\u201C\\u201D]", "\"");
-                    if (!program.isEmpty()) {
-                        program += "\n";
+                    if (!fileInfo.isEmpty()) {
+                        fileInfo += "\n";
                     }
-                    program += line;
+                    fileInfo += line;
                 });
             } catch (IOException e) {
                 System.out.println(e.getMessage());
             }
         } else {
-            System.out.println("Invalid file program build!");
+            System.out.println("Invalid file program build - " + fileName);
         }
     }
-    
-    public void submit(){
-        header1 = selectedName;
+
+    public void submit() {
+        header1 = selectedExercise;
         updateProgram();
+        updateInfo();
     }
 }

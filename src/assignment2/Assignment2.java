@@ -24,7 +24,8 @@ public class Assignment2 {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        double[][] a = {{0, 0, 1, 0, 0, 0, 1, 1, 1, 1}, //d = adjacent matrix
+        //Original matrix 
+        double[][] a = {{0, 0, 1, 0, 0, 0, 1, 1, 1, 1}, //a = adjacent matrix
         {0, 0, 1, 1, 0, 1, 1, 0, 0, 0},
         {1, 1, 0, 1, 1, 1, 0, 0, 0, 0},
         {0, 1, 1, 0, 1, 1, 0, 0, 1, 0},
@@ -34,12 +35,14 @@ public class Assignment2 {
         {1, 0, 0, 0, 0, 0, 1, 0, 1, 1},
         {1, 0, 0, 1, 0, 0, 0, 1, 0, 1},
         {1, 0, 0, 0, 0, 1, 1, 1, 1, 0}};
+        System.out.println("Matrix A: ");
+        print(a);
 
-        int[] kj = new int[a.length]; // kj
-        int[] ki = new int[a.length]; // ki
+        double[] kj = new double[a.length]; // kj
+        double[] ki = new double[a.length]; // ki
         double M = 0;
         for (int i = 0; i < a.length; i++) {
-            int count = countOnes(a[i]);
+            double count = countOnes(a[i]);
             M += count;
             kj[i] = count;
             ki[i] = count;
@@ -55,20 +58,13 @@ public class Assignment2 {
                 sum of that cell's column in A. Divide result by M, the
                 total sum of A. Subtract this value P from corresponding 
                 value in A. */
-                double p = 1.0 * ki[row] * kj[col] / M;
+                double p = (ki[row] * kj[col]) / M;
                 B[row][col] = a[row][col] - p;
             }
         }
-
-        RealMatrix m = MatrixUtils.createRealMatrix(B);
-        NumberFormat formatter = new DecimalFormat("#0.000");
         System.out.println("Matrix B: ");
-        for (int i = 0; i < a.length; i++) {
-            for (int j = 0; j < a[0].length; j++) {
-                System.out.printf("%10s", formatter.format(m.getEntry(i, j)));
-            }
-            System.out.println();
-        }
+        print(B);
+        RealMatrix m = MatrixUtils.createRealMatrix(B);
         EigenDecomposition ev = new EigenDecomposition(m);
         RealVector t = ev.getEigenvector(0);
 
@@ -80,8 +76,10 @@ public class Assignment2 {
         the modularity value later.*/
         int size = t.getDimension();
         ArrayList<Integer> g1 = new ArrayList<>();
+        //Positive vertices: 2, 3, 4, 5, 6
         double[] Sg1 = new double[size];
         ArrayList<Integer> g2 = new ArrayList<>();
+        //Negative vertices: 1, 7, 8, 9, 10
         double[] Sg2 = new double[size];
         int count = 1;
         for (int i = 0; i < size; i++) {
@@ -95,13 +93,10 @@ public class Assignment2 {
             count++;
         }
 
-        System.out.println("G1: " + g1); //Positive vertices: 2, 3, 4, 5, 6
-        System.out.println("G2: " + g2); //Negative vertices: 1, 7, 8, 9, 10
-
         /* Calculate the modularity value for each group g1 and g2.
-        Modulatiry value is Z = (1/(4 * m))*(S^t)* B * S, where m is M / 2, (M = 44)
-        S is the column vector of for group g1 or g2, t is transposition, and
-        B is the modularity matrix.*/
+        Modulatiry value is Z = (1/(4 * m))*(S^t)* B * S, where m is M / 2, 
+        (M = 44) S is the column vector of for group g1 or g2, 
+        t is transposition, and B is the modularity matrix.*/
         //G1:
         double Zg1 = modularityValue(B, Sg1, M);
         System.out.println("Z of g1: " + Zg1);
@@ -109,9 +104,7 @@ public class Assignment2 {
         //G2:
         double Zg2 = modularityValue(B, Sg2, M);
         System.out.println("Z of g2: " + Zg2);
-
-
-        /*If Z is less than or equal to zero, then the group is not required
+        /* If Z is less than or equal to zero, then the group is not required
         to be divided further. Else, repeat the entire process for the
         subgraph composed of the vertices in the group.*/
     }

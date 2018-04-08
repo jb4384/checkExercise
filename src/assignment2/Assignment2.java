@@ -8,6 +8,7 @@ package assignment2;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -36,7 +37,7 @@ public class Assignment2 {
 
         int[] kj = new int[a.length]; // kj
         int[] ki = new int[a.length]; // ki
-        int M = 0;
+        double M = 0;
         for (int i = 0; i < a.length; i++) {
             int count = countOnes(a[i]);
             M += count;
@@ -71,7 +72,7 @@ public class Assignment2 {
         EigenDecomposition ev = new EigenDecomposition(m);
         RealVector t = ev.getEigenvector(0);
 
-        System.out.println("This is the eigenvector at i: " + t);
+        System.out.println("Eigenvector: " + t);
 
         /*Created two arrays: g1 and g2. g1 holds the vertices of the pos values
         in the eigenvector. g2 holds the vetices of the neg values in the
@@ -94,30 +95,34 @@ public class Assignment2 {
             count++;
         }
 
-        System.out.println("G1: " + g1);
-        System.out.println("G2: " + g2);
-        
+        System.out.println("G1: " + g1); //Positive vertices: 2, 3, 4, 5, 6
+        System.out.println("G2: " + g2); //Negative vertices: 1, 7, 8, 9, 10
+
         /* Calculate the modularity value for each group g1 and g2.
-        Modulatiry value is Z = (1/(4m))(S^t)(BS), where m is M / 2, (M = 44)
+        Modulatiry value is Z = (1/(4 * m))*(S^t)* B * S, where m is M / 2, (M = 44)
         S is the column vector of for group g1 or g2, t is transposition, and
         B is the modularity matrix.*/
         //G1:
-        double[] temp1 = multiplyVector(B, Sg1);
-        
+        double Zg1 = modularityValue(B, Sg1, M);
+        System.out.println("Z of g1: " + Zg1);
+
         //G2:
-        double[] temp2 = multiplyVector(B, Sg2);
-        
-        
-        
-        double Zg1;
-        double Zg2;
-        
+        double Zg2 = modularityValue(B, Sg2, M);
+        System.out.println("Z of g2: " + Zg2);
+
+
         /*If Z is less than or equal to zero, then the group is not required
         to be divided further. Else, repeat the entire process for the
         subgraph composed of the vertices in the group.*/
-
     }
-    
+
+    public static double modularityValue(double[][] a, double[] b, double size) {
+        double[] temp1 = multiplyVector(a, b); // S^t * B
+        double dTemp1 = multiVect(temp1, b); // (S^t * B) * S
+        double mM = size / 2;
+        return ((1 / (4 * mM)) * dTemp1);
+    }
+
     // Counts the frequency of ones in an array
     public static int countOnes(double[] a) {
         int count = 0;
@@ -128,7 +133,7 @@ public class Assignment2 {
         }
         return count;
     }
-    
+
     // Multiply two matrices together
     public static double[][] multiplyMatrices(double[][] a, double[][] b) {
         int m1 = a.length;
@@ -148,7 +153,7 @@ public class Assignment2 {
         }
         return c;
     }
-    
+
     // Multiplies a matrix with a vector
     public static double[] multiplyVector(double[][] a, double[] x) {
         int m = a.length;
@@ -159,16 +164,25 @@ public class Assignment2 {
         double[] y = new double[m];
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                y[i] += a[i][j] * x[j];
+                y[i] += a[j][i] * x[j];
             }
         }
         return y;
     }
-    
+
     //Multiplies a vector with a vector
-    public static double[] multiVect(double[] a, double[] b) {
-        
-        return null;
+    public static double multiVect(double[] a, double[] b) {
+        int m = a.length;
+        int n = b.length;
+        if (a.length != n) {
+            throw new RuntimeException("Illegal matrix dimensions.");
+        }
+        double y = 0;
+        for (int i = 0; i < m; i++) {
+            y += a[i] * b[i];
+
+        }
+        return y;
     }
 
     //Prints a formatted 2D array as matrix

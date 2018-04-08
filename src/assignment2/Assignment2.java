@@ -37,7 +37,7 @@ public class Assignment2 {
         {1, 0, 0, 0, 0, 1, 1, 1, 1, 0}};
         System.out.println("Matrix A: ");
         print(a);
-
+    
         double[] kj = new double[a.length]; // kj
         double[] ki = new double[a.length]; // ki
         double M = 0;
@@ -76,10 +76,10 @@ public class Assignment2 {
         the modularity value later.*/
         int size = t.getDimension();
         ArrayList<Integer> g1 = new ArrayList<>();
-        //Positive vertices: 2, 3, 4, 5, 6
+        //Positive vertices g1: 2, 3, 4, 5, 6
         double[] Sg1 = new double[size];
         ArrayList<Integer> g2 = new ArrayList<>();
-        //Negative vertices: 1, 7, 8, 9, 10
+        //Negative vertices g2: 1, 7, 8, 9, 10
         double[] Sg2 = new double[size];
         int count = 1;
         for (int i = 0; i < size; i++) {
@@ -92,11 +92,7 @@ public class Assignment2 {
             }
             count++;
         }
-
-        /* Calculate the modularity value for each group g1 and g2.
-        Modulatiry value is Z = (1/(4 * m))*(S^t)* B * S, where m is M / 2, 
-        (M = 44) S is the column vector of for group g1 or g2, 
-        t is transposition, and B is the modularity matrix.*/
+        
         //G1:
         double Zg1 = modularityValue(B, Sg1, M);
         System.out.println("Z of g1: " + Zg1);
@@ -107,8 +103,18 @@ public class Assignment2 {
         /* If Z is less than or equal to zero, then the group is not required
         to be divided further. Else, repeat the entire process for the
         subgraph composed of the vertices in the group.*/
+        
     }
-
+/* Calculate the modularity value for each group g1 and g2.
+        Modulatiry value is Z = (1/(4 * m))*(S^t)* B * S, where m is M / 2, 
+        (M = 44) S is the column vector of for group g1 or g2, 
+        t is transposition, and B is the modularity matrix.*/
+    
+    public static int[][] getGroups(double[][] a) {
+        int[][] results = new int[2][a.length];
+        return results;
+    }
+    
     public static double modularityValue(double[][] a, double[] b, double size) {
         double[] temp1 = multiplyVector(a, b); // S^t * B
         double dTemp1 = multiVect(temp1, b); // (S^t * B) * S

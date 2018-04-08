@@ -23,9 +23,11 @@ public class Assignment2 {
     /**
      * @param args the command line arguments
      */
+    public static NumberFormat formatter = new DecimalFormat("#0.000");
+
     public static void main(String[] args) {
-        //Original matrix 
-        double[][] a = {{0, 0, 1, 0, 0, 0, 1, 1, 1, 1}, //a = adjacent matrix
+        //a = adjacent matrix
+        double[][] a = {{0, 0, 1, 0, 0, 0, 1, 1, 1, 1},
         {0, 0, 1, 1, 0, 1, 1, 0, 0, 0},
         {1, 1, 0, 1, 1, 1, 0, 0, 0, 0},
         {0, 1, 1, 0, 1, 1, 0, 0, 1, 0},
@@ -35,18 +37,25 @@ public class Assignment2 {
         {1, 0, 0, 0, 0, 0, 1, 0, 1, 1},
         {1, 0, 0, 1, 0, 0, 0, 1, 0, 1},
         {1, 0, 0, 0, 0, 1, 1, 1, 1, 0}};
-        System.out.println("Matrix A: ");
-        print(a);
-    
-        double[] kj = new double[a.length]; // kj
-        double[] ki = new double[a.length]; // ki
-        double M = 0;
-        for (int i = 0; i < a.length; i++) {
-            double count = countOnes(a[i]);
-            M += count;
-            kj[i] = count;
-            ki[i] = count;
-        }
+
+        double[][] b = {{0, 0, 0, 0, 0, 0, 1, 1, 1, 1},
+        {0, 0, 1, 1, 0, 1, 0, 0, 0, 0},
+        {0, 1, 0, 1, 1, 1, 0, 0, 0, 0},
+        {0, 1, 1, 0, 1, 1, 0, 0, 1, 0},
+        {0, 0, 1, 1, 0, 1, 0, 0, 0, 0},
+        {0, 1, 1, 1, 1, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 1, 0, 1},
+        {1, 0, 0, 0, 0, 0, 1, 0, 1, 1},
+        {1, 0, 0, 1, 0, 0, 0, 1, 0, 1},
+        {1, 0, 0, 0, 0, 1, 1, 1, 1, 0}};
+
+        spectral(a);
+    }
+
+    public static void spectral(double[][] a) {
+        double[] kj = countOnes(a); // kj
+        double[] ki = kj; // ki
+        double M = sumRow(kj);
 
         /* Create the modularity matrix B (B = A - P) 
         Matrix A is created above. Matrix P is P1 / M.
@@ -62,10 +71,9 @@ public class Assignment2 {
                 B[row][col] = a[row][col] - p;
             }
         }
-        System.out.println("Matrix B: ");
-        print(B);
         RealMatrix m = MatrixUtils.createRealMatrix(B);
         EigenDecomposition ev = new EigenDecomposition(m);
+        System.out.println("This is all the eigenvalues: " + Arrays.toString(ev.getRealEigenvalues()));
         RealVector t = ev.getEigenvector(0);
 
         System.out.println("Eigenvector: " + t);
@@ -92,29 +100,80 @@ public class Assignment2 {
             }
             count++;
         }
-        
+        if (g1.isEmpty() || g2.isEmpty()) {
+            System.out.println("Group 1 or Group 2 are empty.");
+            System.exit(0);
+        }
+        System.out.println();
+        double rank1 = 0;
+        System.out.print("Subsidary for g1: ");
+        for (int i = 0; i < g1.size(); i++) {
+            double temp = t.getEntry(g1.get(i) - 1);
+            System.out.printf("%-10s", formatter.format(temp));
+            if (Math.abs(temp) > rank1) {
+                rank1 = temp;
+            }
+        }
+        System.out.println();
+        System.out.println("Rank: " + rank1);
+        System.out.println();
+
+        double rank2 = 0;
+        System.out.print("Subsidary for g2: ");
+        for (int i = 0; i < g2.size(); i++) {
+            double temp = t.getEntry(g2.get(i) - 1);
+            System.out.printf("%-10s", formatter.format(temp));
+            if (Math.abs(temp) > rank2) {
+                rank2 = temp;
+            }
+        }
+        System.out.println();
+        System.out.println("Rank: " + rank2);
+        System.out.println();
+
         //G1:
         double Zg1 = modularityValue(B, Sg1, M);
-        System.out.println("Z of g1: " + Zg1);
+        System.out.println("Modularity Value of g1: " + Zg1);
 
         //G2:
         double Zg2 = modularityValue(B, Sg2, M);
-        System.out.println("Z of g2: " + Zg2);
+        System.out.println("Modularity Value of g2: " + Zg2);
+
+        System.out.println("------------------------------------------------");
         /* If Z is less than or equal to zero, then the group is not required
         to be divided further. Else, repeat the entire process for the
-        subgraph composed of the vertices in the group.*/
-        
+        subgraph composed of the vertices in the group. Zg1 and Zg2 are greater
+        than zero, therefore we must continue the subgroups.*/
+        if (Zg1 > 0) {
+            //Create g1 matrix
+            double[][] g11 = new double[g1.size()][g1.size()];
+            for (int i = 0; i < g1.size(); i++) {
+                for (int j = 0; j < g1.size(); j++) {
+                    g11[i][j] = a[g1.get(i) - 1][g1.get(j) - 1];
+                }
+            }
+            System.out.println("Subgraphs: ");
+            spectral(g11);
+        }
+
+        if (Zg2 > 0) {
+            //Create g2 matrix
+            double[][] g21 = new double[g2.size()][g2.size()];
+            for (int i = 0; i < g2.size(); i++) {
+                for (int j = 0; j < g2.size(); j++) {
+                    g21[i][j] = a[g2.get(i) - 1][g2.get(j) - 1];
+                }
+            }
+            System.out.println("Subgraphs: ");
+            spectral(g21);
+        }
+
     }
-/* Calculate the modularity value for each group g1 and g2.
+
+    /* Calculate the modularity value for each group g1 and g2.
         Modulatiry value is Z = (1/(4 * m))*(S^t)* B * S, where m is M / 2, 
         (M = 44) S is the column vector of for group g1 or g2, 
         t is transposition, and B is the modularity matrix.*/
-    
-    public static int[][] getGroups(double[][] a) {
-        int[][] results = new int[2][a.length];
-        return results;
-    }
-    
     public static double modularityValue(double[][] a, double[] b, double size) {
         double[] temp1 = multiplyVector(a, b); // S^t * B
         double dTemp1 = multiVect(temp1, b); // (S^t * B) * S
@@ -123,12 +182,25 @@ public class Assignment2 {
     }
 
     // Counts the frequency of ones in an array
-    public static int countOnes(double[] a) {
-        int count = 0;
+    public static double[] countOnes(double[][] a) {
+        double[] count = new double[a.length];
+
         for (int i = 0; i < a.length; i++) {
-            if (a[i] == 1) {
-                count++;
+            double temp = 0;
+            for (int j = 0; j < a[0].length; j++) {
+                if (a[i][j] == 1) {
+                    temp++;
+                }
             }
+            count[i] = temp;
+        }
+        return count;
+    }
+
+    public static double sumRow(double[] a) {
+        double count = 0;
+        for (int i = 0; i < a.length; i++) {
+            count += a[i];
         }
         return count;
     }
@@ -189,7 +261,7 @@ public class Assignment2 {
         NumberFormat formatter = new DecimalFormat("#0.000");
         for (int i = 0; i < a.length; i++) {
             for (int j = 0; j < a.length; j++) {
-                System.out.printf("%10s", formatter.format(a[i][j]));
+                System.out.printf("%-10s", formatter.format(a[i][j]));
             }
             System.out.println();
         }

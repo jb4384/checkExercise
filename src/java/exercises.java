@@ -160,7 +160,7 @@ public class exercises {
                     + "your code used input.readInt(), but it should be input.readDouble().\n"
                     + "For integers, use int unless it is explicitly stated as long. */";
         } else if(fileInfo.equalsIgnoreCase("This exercise can be compiled and submitted, but cannot be run and automatically graded.")) {
-            program = "/* This exercise cannot be graded automatically becuase it may use random\n"
+            program = "/* This exercise cannot be graded automatically because it may use random\n"
                     + "numbers, file input/output, or graphics. */";
         }else {
             program = "/* " + fileInfo + " */";

@@ -170,7 +170,7 @@
                                                         </td>
                                                         <td>
                                                             <h:selectOneMenu id="chapters" value="#{exercises.selectedName}" valueChangeListener="#{exercises.changeSelectedName}" 
-                                                                    onchange="submit()">
+                                                                             onchange="submit()">
                                                                 <f:selectItems value="#{exercises.names}" />
                                                             </h:selectOneMenu>
                                                         </td>
@@ -178,7 +178,6 @@
                                                             <h:outputLabel>Choose an Exercise:</h:outputLabel>
                                                         </td>
                                                         <td>
-                                                            <!-- FIX EXERCISES HERE -->
                                                             <h:selectOneMenu id="exercises" value="#{exercises.selectedExercise}" valueChangeListener="#{exercises.changeSelectedExercise}"
                                                                              onchange="submit()">
                                                                 <f:selectItems value="#{exercises.exes}" />
@@ -216,10 +215,10 @@
                     </tr>
                     <tr>
                         <td>
-                            <!--                            <h:inputTextarea id="resultInputText" disabled="false" style="text-align: left; font-family: courier; width:628px; height:181px; font-weight: bold;
-                                                                         font-size: 90%; color: black; background-color: white; border: 1px solid; border-color: #f6912f;" 
-                                                                         value="">
-                                                        </h:inputTextarea>-->
+                            <h:outputLabel rendered="#{exercises.hide}" style="font-weight: bold;">Enter input data for the program (Sample data provided below. You may modify it.)</h:outputLabel>
+                            <h:inputTextarea id="resultInputText" rendered="#{exercises.hide}" style="text-align: left; font-family: courier; width:100%; height:100px; font-weight: bold; margin: 0 auto;
+                                             font-size: 90%; color: black; background-color: white; border: 1px solid; border-color: #f6912f;" value="#{exercises.inputDisplay}">
+                            </h:inputTextarea>
                         </td>
                     </tr>
                     <tr>

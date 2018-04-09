@@ -43,9 +43,11 @@ public class exercises {
     private String program;
     private String output;
     private String input;
+    private String inputDisplay;
     private String webinf;
     private String ags10e;
     private String fileInfo;
+    private Boolean hide;
 
     @PostConstruct
     public void init() {
@@ -152,20 +154,20 @@ public class exercises {
         program = "";
         String fileName = ags10e + "/exercisedescription/" + header1;
         parseFile(fileName);
-        if (fileInfo.replaceAll("[^A-Za-z ]", "").trim().equalsIgnoreCase("programming exercise")){
-            program = "/* Paste your "+header1+" here and click Automatic Check.\n"
+        if (fileInfo.replaceAll("[^A-Za-z ]", "").trim().equalsIgnoreCase("programming exercise")) {
+            program = "/* Paste your " + header1 + " here and click Automatic Check.\n"
                     + "For all programming projects, the numbers should be double\n"
                     + "unless it is explicitly stated as integer.\n"
                     + "If you get a java.util.InputMismatchException error, check if\n"
                     + "your code used input.readInt(), but it should be input.readDouble().\n"
                     + "For integers, use int unless it is explicitly stated as long. */";
-        } else if(fileInfo.equalsIgnoreCase("This exercise can be compiled and submitted, but cannot be run and automatically graded.")) {
+        } else if (fileInfo.equalsIgnoreCase("This exercise can be compiled and submitted, but cannot be run and automatically graded.")) {
             program = "/* This exercise cannot be graded automatically because it may use random\n"
                     + "numbers, file input/output, or graphics. */";
-        }else {
+        } else {
             program = "/* " + fileInfo + " */";
-       }
-        
+        }
+
     }
 
     public String getOutput() {
@@ -184,29 +186,61 @@ public class exercises {
         this.input = input;
     }
 
+    public String getInputDisplay() {
+        return inputDisplay;
+    }
+
+    public void setInputDisplay(String inputDisplay) {
+        this.inputDisplay = inputDisplay;
+    }
+
+    public Boolean getHide() {
+        return hide;
+    }
+
+    public void setHide(Boolean hide) {
+        this.hide = hide;
+    }
+
     private void updateInfo() {
         output = "";
         input = "";
+        inputDisplay = "";
         System.out.println("update file info");
         System.out.println();
         System.out.println();
         buildFiles("/gradeexercise/", header1);
         files.forEach((File file) -> {
             String fileName = file.getAbsolutePath();
-            System.out.println(fileName);
-            parseFile(fileName);
-            if (fileName.endsWith("output")) {
-                if(!output.isEmpty()) output += "#";
-                output += fileInfo;
+            Boolean cntn = true;
+            if (!header1.endsWith("Extra") && fileName.contains("Extra")) {
+                cntn = false;
             }
-            if (fileName.endsWith("input")) {
-                if(!input.isEmpty()) input += " ";
-                input += fileInfo;
+            if (cntn) {
+                System.out.println(fileName);
+                parseFile(fileName);
+                if (fileName.endsWith("output")) {
+                    if (!output.isEmpty()) {
+                        output += "#";
+                    }
+                    output += fileInfo;
+                }
+                if (fileName.endsWith("input")) {
+                    if (!input.isEmpty()) {
+                        input += " ";
+                    }
+                    input += fileInfo;
+                    if (inputDisplay.equals("")) inputDisplay += fileInfo;
+                    hide = true;
+                }
             }
 
         });
         System.out.println("output: " + output);
         System.out.println("input: " + input);
+        if (input.isEmpty()) {
+            hide = false;
+        }
     }
 
     private void parseFile(String fileName) {
@@ -234,5 +268,6 @@ public class exercises {
         header1 = selectedExercise;
         updateProgram();
         updateInfo();
+        
     }
 }

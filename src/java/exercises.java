@@ -32,7 +32,7 @@ import javax.faces.model.SelectItem;
 @ManagedBean
 @ApplicationScoped
 public class exercises {
-
+    
     private String header1;
     private String selectedName = "01";
     private String selectedExercise = "";
@@ -48,7 +48,8 @@ public class exercises {
     private String ags10e;
     private String fileInfo;
     private Boolean hide;
-
+    private Boolean otherHide;
+    
     @PostConstruct
     public void init() {
         webinf = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/WEB-INF");
@@ -58,7 +59,7 @@ public class exercises {
         header1 = selectedExercise;
         updateProgram();
     }
-
+    
     public void buildChapters() {
         names = new ArrayList<>();
         chapters = new TreeSet<>();
@@ -71,7 +72,7 @@ public class exercises {
             names.add(new SelectItem("" + ch, "Chapter " + ch));
         });
     }
-
+    
     public void updateExes() {
         exes = new ArrayList<>();
         buildFiles("/exercisedescription/", "Exercise" + selectedName);
@@ -82,7 +83,7 @@ public class exercises {
             exes.add(new SelectItem("" + file.getName(), file.getName()));
         });
     }
-
+    
     public void buildFiles(String endPath, String startsWith) {
         try {
             System.out.println(startsWith);
@@ -96,24 +97,24 @@ public class exercises {
             System.out.println("failed");
         }
     }
-
+    
     public String getHeader1() {
         return header1;
     }
-
+    
     public void setHeader1(String header1) {
         this.header1 = header1;
         updateExes();
     }
-
+    
     public String getSelectedName() {
         return selectedName;
     }
-
+    
     public void setSelectedName(String selectedName) {
         this.selectedName = selectedName;
     }
-
+    
     public void changeSelectedName(ValueChangeEvent event) {
         selectedName = event.getNewValue().toString();
         if (selectedName.length() < 2) {
@@ -121,40 +122,42 @@ public class exercises {
         }
         updateExes();
     }
-
+    
     public String getSelectedExercise() {
         return selectedExercise;
     }
-
+    
     public void setSelectedExercise(String selectedExercise) {
         this.selectedExercise = selectedExercise;
     }
-
+    
     public void changeSelectedExercise(ValueChangeEvent event) {
         selectedExercise = event.getNewValue().toString();
     }
-
+    
     public List<SelectItem> getNames() {
         return names;
     }
-
+    
     public List<SelectItem> getExes() {
         return exes;
     }
-
+    
     public String getProgram() {
         return program;
     }
-
+    
     public void setProgram(String program) {
         this.program = program;
     }
-
+    
     private void updateProgram() {
         program = "";
         String fileName = ags10e + "/exercisedescription/" + header1;
         parseFile(fileName);
-        if (fileInfo.replaceAll("[^A-Za-z ]", "").trim().equalsIgnoreCase("programming exercise")) {
+        if (fileInfo.replaceAll("[^A-Za-z ]", "").trim().equalsIgnoreCase("programming exercise")
+                || fileInfo.startsWith("Programming Exercise")
+                || fileInfo.startsWith("This is an extra exercise")) {
             program = "/* Paste your " + header1 + " here and click Automatic Check.\n"
                     + "For all programming projects, the numbers should be double\n"
                     + "unless it is explicitly stated as integer.\n"
@@ -167,41 +170,49 @@ public class exercises {
         } else {
             program = "/* " + fileInfo + " */";
         }
-
+        
     }
-
+    
     public String getOutput() {
         return output;
     }
-
+    
     public void setOutput(String output) {
         this.output = output;
     }
-
+    
     public String getInput() {
         return input;
     }
-
+    
     public void setInput(String input) {
         this.input = input;
     }
-
+    
     public String getInputDisplay() {
         return inputDisplay;
     }
-
+    
     public void setInputDisplay(String inputDisplay) {
         this.inputDisplay = inputDisplay;
     }
-
+    
     public Boolean getHide() {
         return hide;
     }
-
+    
     public void setHide(Boolean hide) {
         this.hide = hide;
     }
-
+    
+    public Boolean getOtherHide() {
+        return otherHide;
+    }
+    
+    public void setOtherHide(Boolean otherHide) {
+        this.otherHide = otherHide;
+    }
+    
     private void updateInfo() {
         output = "";
         input = "";
@@ -230,19 +241,28 @@ public class exercises {
                         input += " ";
                     }
                     input += fileInfo;
-                    if (inputDisplay.equals("")) inputDisplay += fileInfo;
+                    if (inputDisplay.equals("")) {
+                        inputDisplay += fileInfo;
+                    }
                     hide = true;
+                    otherHide = false;
+                } else if (program.equals("/* This exercise cannot be graded automatically because it may use random\n"
+                        + "numbers, file input/output, or graphics. */")) {
+                    inputDisplay = "This exercise cannot be auto graded. But you can still run it.";
+                    hide = false;
+                    otherHide = true;
                 }
             }
-
+            
         });
         System.out.println("output: " + output);
         System.out.println("input: " + input);
+        System.out.println("input display: " + inputDisplay);
         if (input.isEmpty()) {
             hide = false;
         }
     }
-
+    
     private void parseFile(String fileName) {
         fileInfo = "";
         File f = new File(fileName);
@@ -263,7 +283,7 @@ public class exercises {
             System.out.println("Invalid file program build - " + fileName);
         }
     }
-
+    
     public void submit() {
         header1 = selectedExercise;
         updateProgram();

@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -12,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -32,7 +34,7 @@ import javax.faces.model.SelectItem;
 @ManagedBean
 @ApplicationScoped
 public class exercises {
-    
+
     private String header1;
     private String selectedName = "01";
     private String selectedExercise = "";
@@ -50,7 +52,10 @@ public class exercises {
     private Boolean hide; //This hides 
     private Boolean otherHide;
     private Boolean gradeHide; //If gradeable = true, else = false;
-    
+
+    final static int EXECUTION_TIME_ALLOWED = 1000;
+    final static int EXECUTION_TIME_INTERVAL = 100;
+
     @PostConstruct
     public void init() {
         webinf = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/WEB-INF");
@@ -60,7 +65,7 @@ public class exercises {
         header1 = selectedExercise;
         updateProgram();
     }
-    
+
     public void buildChapters() {
         names = new ArrayList<>();
         chapters = new TreeSet<>();
@@ -73,7 +78,7 @@ public class exercises {
             names.add(new SelectItem("" + ch, "Chapter " + ch));
         });
     }
-    
+
     public void updateExes() {
         exes = new ArrayList<>();
         buildFiles("/exercisedescription/", "Exercise" + selectedName);
@@ -84,7 +89,7 @@ public class exercises {
             exes.add(new SelectItem("" + file.getName(), file.getName()));
         });
     }
-    
+
     public void buildFiles(String endPath, String startsWith) {
         try {
             System.out.println(startsWith);
@@ -98,24 +103,24 @@ public class exercises {
             System.out.println("failed");
         }
     }
-    
+
     public String getHeader1() {
         return header1;
     }
-    
+
     public void setHeader1(String header1) {
         this.header1 = header1;
         updateExes();
     }
-    
+
     public String getSelectedName() {
         return selectedName;
     }
-    
+
     public void setSelectedName(String selectedName) {
         this.selectedName = selectedName;
     }
-    
+
     public void changeSelectedName(ValueChangeEvent event) {
         selectedName = event.getNewValue().toString();
         if (selectedName.length() < 2) {
@@ -123,35 +128,39 @@ public class exercises {
         }
         updateExes();
     }
-    
+
     public String getSelectedExercise() {
         return selectedExercise;
     }
-    
+
     public void setSelectedExercise(String selectedExercise) {
         this.selectedExercise = selectedExercise;
     }
-    
+
     public void changeSelectedExercise(ValueChangeEvent event) {
         selectedExercise = event.getNewValue().toString();
     }
-    
+
     public List<SelectItem> getNames() {
         return names;
     }
-    
+
     public List<SelectItem> getExes() {
         return exes;
     }
-    
+
     public String getProgram() {
         return program;
     }
-    
+
     public void setProgram(String program) {
         this.program = program;
     }
-    
+
+    private void compileProgram() {
+
+    }
+
     private void updateProgram() {
         program = "";
         String fileName = ags10e + "/exercisedescription/" + header1;
@@ -171,49 +180,49 @@ public class exercises {
         } else {
             program = "/* " + fileInfo + " */";
         }
-        
+
     }
-    
+
     public String getOutput() {
         return output;
     }
-    
+
     public void setOutput(String output) {
         this.output = output;
     }
-    
+
     public String getInput() {
         return input;
     }
-    
+
     public void setInput(String input) {
         this.input = input;
     }
-    
+
     public String getInputDisplay() {
         return inputDisplay;
     }
-    
+
     public void setInputDisplay(String inputDisplay) {
         this.inputDisplay = inputDisplay;
     }
-    
+
     public Boolean getHide() {
         return hide;
     }
-    
+
     public void setHide(Boolean hide) {
         this.hide = hide;
     }
-    
+
     public Boolean getOtherHide() {
         return otherHide;
     }
-    
+
     public void setOtherHide(Boolean otherHide) {
         this.otherHide = otherHide;
     }
-    
+
     private void updateInfo() {
         output = "";
         input = "";
@@ -253,7 +262,7 @@ public class exercises {
                     otherHide = true;
                 }
             }
-            
+
         });
         System.out.println("output: " + output);
         System.out.println("input: " + input);
@@ -262,7 +271,7 @@ public class exercises {
             hide = false;
         }
     }
-    
+
     private void parseFile(String fileName) {
         fileInfo = "";
         File f = new File(fileName);
@@ -283,11 +292,147 @@ public class exercises {
             System.out.println("Invalid file program build - " + fileName);
         }
     }
-    
+
     public void submit() {
         header1 = selectedExercise;
         updateProgram();
         updateInfo();
-        
+
+    }
+
+    public static HowToCompileRun.Output executeProgram(String command, String program,
+            String programDirectory, String inputFile, String outputFile) {
+
+        final HowToCompileRun.Output result = new HowToCompileRun.Output();
+        ProcessBuilder pb;
+
+        // For Java security, added c:/etext.policy in c:\program files\jre\bin\security\java.security
+        pb = new ProcessBuilder(command, "-Djava.security.manager", program);
+        pb.directory(new File(programDirectory));
+        pb.redirectErrorStream(true);
+        if (inputFile != null) {
+            pb.redirectInput(ProcessBuilder.Redirect.from(new File(inputFile)));
+        }
+
+        pb.redirectOutput(ProcessBuilder.Redirect.to(new File(outputFile)));
+        long startTime = System.currentTimeMillis();
+        Process proc = null;
+
+        try {
+            proc = pb.start();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        // This separate thread destroy the process if it takes too long time
+        final Process proc1 = proc;
+
+        new Thread() {
+            public void run() {
+                int sleepTime = 0;
+                boolean isFinished = false;
+
+                while (sleepTime <= EXECUTION_TIME_ALLOWED && !isFinished) {
+                    try {
+                        try {
+                            Thread.sleep(EXECUTION_TIME_INTERVAL);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+
+//                System.out.println("sleepTime " + sleepTime);
+                        sleepTime += EXECUTION_TIME_INTERVAL;
+                        int exitValue = proc1.exitValue();
+                        isFinished = true;
+
+//                System.out.println("exitValue " + exitValue);
+                    } catch (IllegalThreadStateException ex) {
+                    }
+                }
+
+                if (!isFinished) {
+                    proc1.destroy();
+                    result.isInfiniteLoop = true;
+
+//            System.out.println("Infinite loop");
+                }
+            }
+        }.start();
+
+        try {
+            int exitCode = proc.waitFor();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        result.timeUsed = (int) (System.currentTimeMillis() - startTime);
+        return result;
+
+    }
+
+    public static HowToCompileRun.Output compileProgram(String command,
+            String sourceDirectory, String program) {
+
+        final HowToCompileRun.Output result = new HowToCompileRun.Output();
+        ProcessBuilder pb;
+
+        pb = new ProcessBuilder(command, "-classpath", ".;C:\\Users\\Tiffany\\Downloads",
+                "-Xlint:unchecked", "-nowarn", "-XDignore.symbol.file", program);
+        pb.directory(new File(sourceDirectory));
+        long startTime = System.currentTimeMillis();
+        Process proc = null;
+
+        try {
+            proc = pb.start();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        // This separate thread destroy the process if it takes too long time
+        final Process proc1 = proc;
+
+        new Thread() {
+            public void run() {
+                Scanner scanner1 = new Scanner(proc1.getInputStream());
+
+                while (scanner1.hasNext()) {
+                    result.output += scanner1.nextLine().replaceAll(" ", "&nbsp;") + "\n";
+                    //  scanner1.close(); // You could have closed it too soon
+                }
+            }
+        }.start();
+
+        new Thread() {
+            public void run() {
+                // Process output from proc
+                Scanner scanner2 = new Scanner(proc1.getErrorStream());
+
+                while (scanner2.hasNext()) {
+                    result.error += scanner2.nextLine() + "\n";
+                }
+                // scanner2.close(); // You could have closed it too soon
+            }
+        }.start();
+
+        try {
+            //Wait for the external process to finish
+            int exitCode = proc.waitFor();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        result.output.replaceAll(" ", "&nbsp;");
+        result.error.replaceAll(" ", "&nbsp;");
+
+        // Ignore warnings
+        if (result.error.indexOf("error") < 0) {
+            result.error = "";
+        }
+
+//        if (result.error.indexOf("error") >= 0 || result.error.indexOf("Error") >= 0)
+//          result.error = "";
+        result.timeUsed = (int) (System.currentTimeMillis() - startTime);
+        return result;
+
     }
 }

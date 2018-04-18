@@ -47,8 +47,9 @@ public class exercises {
     private String webinf;
     private String ags10e;
     private String fileInfo;
-    private Boolean hide;
+    private Boolean hide; //This hides 
     private Boolean otherHide;
+    private Boolean gradeHide; //If gradeable = true, else = false;
     
     @PostConstruct
     public void init() {
@@ -219,7 +220,6 @@ public class exercises {
         inputDisplay = "";
         System.out.println("update file info");
         System.out.println();
-        System.out.println();
         buildFiles("/gradeexercise/", header1);
         files.forEach((File file) -> {
             String fileName = file.getAbsolutePath();
@@ -244,7 +244,7 @@ public class exercises {
                     if (inputDisplay.equals("")) {
                         inputDisplay += fileInfo;
                     }
-                    hide = true;
+                    hide = true; //
                     otherHide = false;
                 } else if (program.equals("/* This exercise cannot be graded automatically because it may use random\n"
                         + "numbers, file input/output, or graphics. */")) {

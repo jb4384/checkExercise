@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -49,9 +48,11 @@ public class exercises {
     private String webinf;
     private String ags10e;
     private String fileInfo;
+    private String compile; //Holds the string from response
     private Boolean hide; //This hides 
     private Boolean otherHide;
-    private Boolean gradeHide; //If gradeable = true, else = false;
+    private Boolean checkHide; //Hide the Automatic Check If gradeable = true, else = false;
+    private Boolean resultHide;
 
     final static int EXECUTION_TIME_ALLOWED = 1000;
     final static int EXECUTION_TIME_INTERVAL = 100;
@@ -149,6 +150,14 @@ public class exercises {
         return exes;
     }
 
+    public String getCompile() {
+        return compile;
+    }
+
+    public void setCompile(String compile) {
+        this.compile = compile;
+    }
+
     public String getProgram() {
         return program;
     }
@@ -157,11 +166,26 @@ public class exercises {
         this.program = program;
     }
 
-    private void compileProgram() {
+    public Boolean getResultHide() {
+        return resultHide;
+    }
 
+    public void setResultHide(Boolean resultHide) {
+        this.resultHide = resultHide;
+    }
+
+    public void compileProgram() {
+        resultHide = true;
+        //Compile and execute program for input
+        if (hide) {
+            compile = "There is input";
+        } else {
+            compile = "There is no input";
+        }
     }
 
     private void updateProgram() {
+        resultHide = false;
         program = "";
         String fileName = ags10e + "/exercisedescription/" + header1;
         parseFile(fileName);
@@ -223,6 +247,14 @@ public class exercises {
         this.otherHide = otherHide;
     }
 
+    public Boolean getCheckHide() {
+        return checkHide;
+    }
+
+    public void setCheckHide(Boolean checkHide) {
+        this.checkHide = checkHide;
+    }
+    
     private void updateInfo() {
         output = "";
         input = "";
@@ -253,12 +285,15 @@ public class exercises {
                     if (inputDisplay.equals("")) {
                         inputDisplay += fileInfo;
                     }
-                    hide = true; //
-                    otherHide = false;
+                    hide = true; // show input display box
+                    otherHide = false; //hide 
+                    checkHide = true; //display automatic check
                 } else if (program.equals("/* This exercise cannot be graded automatically because it may use random\n"
                         + "numbers, file input/output, or graphics. */")) {
+                    //If it cannot be graded, hide Automatic Check
                     inputDisplay = "This exercise cannot be auto graded. But you can still run it.";
                     hide = false;
+                    checkHide = true;
                     otherHide = true;
                 }
             }
@@ -269,6 +304,7 @@ public class exercises {
         System.out.println("input display: " + inputDisplay);
         if (input.isEmpty()) {
             hide = false;
+            checkHide = true;
         }
     }
 
@@ -297,13 +333,12 @@ public class exercises {
         header1 = selectedExercise;
         updateProgram();
         updateInfo();
-
     }
 
-    public static HowToCompileRun.Output executeProgram(String command, String program,
+    public static Output executeProgram(String command, String program,
             String programDirectory, String inputFile, String outputFile) {
 
-        final HowToCompileRun.Output result = new HowToCompileRun.Output();
+        final Output result = new Output();
         ProcessBuilder pb;
 
         // For Java security, added c:/etext.policy in c:\program files\jre\bin\security\java.security
@@ -370,13 +405,13 @@ public class exercises {
 
     }
 
-    public static HowToCompileRun.Output compileProgram(String command,
+    public static Output compileProgram(String command,
             String sourceDirectory, String program) {
 
-        final HowToCompileRun.Output result = new HowToCompileRun.Output();
+        final Output result = new Output();
         ProcessBuilder pb;
 
-        pb = new ProcessBuilder(command, "-classpath", ".;C:\\Users\\Tiffany\\Downloads",
+        pb = new ProcessBuilder(command, "-classpath", ".;c:\\book",
                 "-Xlint:unchecked", "-nowarn", "-XDignore.symbol.file", program);
         pb.directory(new File(sourceDirectory));
         long startTime = System.currentTimeMillis();
@@ -434,5 +469,13 @@ public class exercises {
         result.timeUsed = (int) (System.currentTimeMillis() - startTime);
         return result;
 
+    }
+
+    public static class Output {
+
+        public String output = "";
+        public String error = "";
+        public boolean isInfiniteLoop = false;
+        public int timeUsed = 100;
     }
 }

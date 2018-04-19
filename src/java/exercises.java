@@ -220,7 +220,7 @@ public class exercises {
         resultHide = true;
         //Hide == true -> Compile and execute program with input
         if (hide) {
-            compile = "?????????????" + program;
+            compile = program;
         } else { //Hide == false -> Compile and execute program with no input
             compile = program;
             //need to write string into java

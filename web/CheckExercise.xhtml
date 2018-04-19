@@ -146,116 +146,74 @@
             });
         </script>
     </h:head>
-    <h:body style="width:100%; margin-right: 0 auto;">
-        <h:form enctype="application/x-www-form-urlencoded" style="margin: 0.5em; margin-bottom: 0.0em;">
-            <input type="hidden" name="jsfForm" value="jsfForm" />
-            <table id="jsfForm:bigPanel" style="width:100%; margin-right: 0 auto;">
-                <tbody>
-                    <tr>
-                        <td>
-                            <h:outputLabel value="CheckExercise: #{exercises.header1}.java" style="width:100%; margin-right: 0 auto;" class="header"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <table style="margin-top: 1px; padding: 2px; width:575px; background-color: white;  border: 1px solid #f6912f; font-weight: bold; font-size: 96%;                      width:100%; margin: 0 auto;">
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <table style="margin-top: 1px; padding: 2px; width:575px; background-color: white; border: 1px  #f6912f; font-weight: bold; font-size: 96%;                      width:600px; margin: 0 auto;">
-                                                <tbody>
-                                                    <tr>
-                                                        <td>
-                                                            <h:outputLabel>Choose a Chapter:</h:outputLabel>
-                                                        </td>
-                                                        <td>
-                                                            <h:selectOneMenu id="chapters" value="#{exercises.selectedName}" valueChangeListener="#{exercises.changeSelectedName}" 
-                                                                             onchange="submit()">
-                                                                <f:selectItems value="#{exercises.names}" />
-                                                            </h:selectOneMenu>
-                                                        </td>
-                                                        <td>
-                                                            <h:outputLabel>Choose an Exercise:</h:outputLabel>
-                                                        </td>
-                                                        <td>
-                                                            <h:selectOneMenu id="exercises" value="#{exercises.selectedExercise}" valueChangeListener="#{exercises.changeSelectedExercise}"
-                                                                             onchange="submit()">
-                                                                <f:selectItems value="#{exercises.exes}" />
-                                                            </h:selectOneMenu>
-                                                        </td>
-                                                        <td>
-                                                            <h:commandButton value="Set Exercise" action="#{exercises.submit()}" style="font-style: normal; font-weight: normal; font-size: 100%" class="btn btn-sm btn-primary"/>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div id="editor" style="width:575px; font-weight: normal; margin-top: 1px;height:177px; background-color: white; border: 1px solid #f6912f; font-size: 96%;height:257px;; width:100%; margin: 0 auto;">#{exercises.program}</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <h:outputLabel rendered="#{exercises.hide}" style="font-weight: bold;">Enter input data for the program (Sample data provided below. You may modify it.)</h:outputLabel>
-                            <h:inputTextarea id="resultInputText" rendered="#{exercises.hide}" style="text-align: left; font-family: courier; width:100%; height:75px; font-weight: bold; margin: 0 auto;
-                                             font-size: 90%; color: black; background-color: white; border: 1px solid; border-color: #f6912f;" value="#{exercises.inputDisplay}">
-                            </h:inputTextarea>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <span style="margin-top:0px; width:100%; margin: 0 auto;">
-                                <h:commandButton value="Compile/Run" class="btn btn-sm btn-primary" style ="font-style: normal; font-weight: normal; font-size: 100%"
-                                                 action="#{exercises.compileProgram()}"/> &nbsp;
-                                <h:commandButton rendered="#{exercises.checkHide}" value="Automatic Check" class="btn btn-sm btn-primary" style ="font-style: normal; font-weight: normal; font-size: 100%"
-                                                 />
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <!--I think this is the unedit textbox-->
-                            <h:inputTextarea rendered="#{exercises.resultHide}" readonly="true" style="text-align: left; font-family: courier; width:100%; height:75px; font-weight: bold; margin: 0 auto;
-                                             font-size: 90%; color: black; background-color: white; border: 1px solid; border-color: #f6912f;" value = "#{exercises.compile}" />
+    <h:body style='width:100%; margin-right: 0 auto;'>
 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <span style="text-align: left; width:575px;  max-width:575px; font-weight: normal; font-size: 96%; color: black; background-color: white;
-                                  ; padding-left:5px; ; padding-top: -20px; width:100%; margin: 0 auto;">
-                                <span style="width:100%; margin: 0 auto; height: 500px;">
-                                    <div style = 'width:575px; margin-top:-10px; width:100%; margin: 0 auto;'>
-                                    <div>
-                                        <span style='font-style:bold;color:#e31c3d'>We recommend that you use this tool to test the code. If your code is wrong, the tool will display your output and the correct output so to help you debug the error.</span> Compile/Run is provided for your convenience to compile and run the code. The extra exercises are available for instructors. Email <a href="mailto:y.daniel.liang@gmail.com" 
-                                                               style="text-decoration: none; color: green">Dr. Liang</a>
- to request a copy of the extra exercises.
-                                    </div>
-                                    </div>
-                                </span>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="messageStyle" style="width:100%; margin: 0 auto;">Rapid Development Project by Joshua Barney, Keyur Patel, and Tiffany Tran :)
+        <h:form id = "jsfForm" style="margin: 0.5em; margin-bottom: 0.0em;">
+
+            <h:panelGrid id = "bigPanel" style='width:100%; margin-right: 0 auto;'>
+                <h:outputLabel id = "header1" class = "header" style='width:100%; margin-right: 0 auto;'
+                               value="CheckExercise: #{exercises.header1}" />
+                <h:panelGrid columns="1" 
+                             style="margin-top: 1px; padding: 2px; width:575px; background-color: white; 
+                             border: 1px solid #f6912f; font-weight: bold; font-size: 96%;
+                             width:100%; margin: 0 auto;">
+                    <h:panelGrid  columns="5" style="margin-top: 1px; padding: 2px; width:575px; background-color: white; 
+                                  border: 1px  #f6912f; font-weight: bold; font-size: 96%;
+                                  width:600px; margin: 0 auto;">
+                        <h:outputLabel value="Choose a Chapter: " />
+                        <h:selectOneMenu id="chapters" value="#{exercises.selectedName}" valueChangeListener="#{exercises.changeSelectedName}" 
+                                         onchange="submit()">
+                            <f:selectItems value="#{exercises.names}" />
+                        </h:selectOneMenu>
+                        <h:outputLabel value="Choose an Exercise: " />
+                        <h:selectOneMenu id="exercises" value="#{exercises.selectedExercise}" valueChangeListener="#{exercises.changeSelectedExercise}"
+                                         onchange="submit()">
+                            <f:selectItems value="#{exercises.exes}" />
+                        </h:selectOneMenu>
+                        <h:commandButton value="Set Exercise" class="btn btn-sm btn-primary" 
+                                         style ="font-style: normal; font-weight: normal; font-size: 100%"
+                                         action ="#{exercises.submit()}"/>
+                    </h:panelGrid>
+                </h:panelGrid>
+
+                <div id="editor" style="width:575px; font-weight: normal; margin-top: 1px;height:177px; background-color: white; border: 1px solid #f6912f; font-size: 96%;height:257px;; width:100%; margin: 0 auto;">#{exercises.program}</div>
+
+                <h:outputLabel rendered="#{exercises.hide}" style="font-weight: bold;">Enter input data for the program (Sample data provided below. You may modify it.)</h:outputLabel>
+                <h:inputTextarea id="resultInputText" rendered="#{exercises.hide}" style="text-align: left; font-family: courier; width:100%; height:75px; font-weight: bold; margin: 0 auto;
+                                 font-size: 90%; color: black; background-color: white; border: 1px solid; border-color: #f6912f;" value="#{exercises.inputDisplay}">
+                </h:inputTextarea>
+                <h:panelGroup style="margin-top:0px; width:100%; margin: 0 auto;">
+                    <h:commandButton value="Compile/Run" class="btn btn-sm btn-primary" style ="font-style: normal; font-weight: normal; font-size: 100%"
+                                     action="#{exercises.compileProgram()}"/> &nbsp;
+                    <h:commandButton rendered="#{exercises.checkHide}" value="Automatic Check" class="btn btn-sm btn-primary" style ="font-style: normal; font-weight: normal; font-size: 100%"/>
+                </h:panelGroup>
+                
+                <!--I think this is the unedit textbox-->
+                <h:inputTextarea rendered="#{exercises.resultHide}" readonly="true" style="text-align: left; font-family: courier; width:100%; height:75px; font-weight: bold; margin: 0 auto;
+                                 font-size: 90%; color: black; background-color: white; border: 1px solid; border-color: #f6912f;" value = "#{exercises.compile}" />
+
+                <span style="text-align: left; width:575px;  max-width:575px; font-weight: normal; font-size: 96%; color: black; background-color: white;
+                      ; padding-left:5px; ; padding-top: -20px; width:100%; margin: 0 auto;">
+                    <span style="width:100%; margin: 0 auto; height: 500px;">
+                        <div style = 'width:575px; margin-top:-10px; width:100%; margin: 0 auto;'>
+                            <div>
+                                <span style='font-style:bold;color:#e31c3d'>We recommend that you use this tool to test the code. If your code is wrong, the tool will display your output and the correct output so to help you debug the error.</span> Compile/Run is provided for your convenience to compile and run the code. The extra exercises are available for instructors. Email <a href="mailto:y.daniel.liang@gmail.com" 
+                                                                                                                                                                                                        style="text-decoration: none; color: green">Dr. Liang</a>
+                                to request a copy of the extra exercises.
                             </div>
-                            <h:inputTextarea id="sourceInputTextarea" rendered ="true" required="true"
-                                             value="#{exercises.program}" style="font-family: courier; width: 100%;
-                                             font-weight: bold; margin-top: 0px;
-                                             height:100px; background-color: white; border: 0px solid #f6912f;
-                                             font-size: 96%; overflow:hidden; resize:none;  margin: 0 auto;">
-                            </h:inputTextarea>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                        </div>
+                    </span>
+                </span>
+                <div class="messageStyle" style="width:100%; margin: 0 auto;">Rapid Development Project by Joshua Barney, Keyur Patel, and Tiffany Tran :)
+                </div>
+                <h:inputTextarea id="sourceInputTextarea" rendered ="true" required="true"
+                                 value="#{exercises.program}" style="font-family: courier; width: 100%;
+                                 font-weight: bold; margin-top: 0px;
+                                 height:100px; background-color: white; border: 0px solid #f6912f;
+                                 font-size: 96%; overflow:hidden; resize:none;  margin: 0 auto;">
+                </h:inputTextarea>
+            </h:panelGrid>
+
         </h:form>
     </h:body>
 </html>

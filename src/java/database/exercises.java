@@ -44,7 +44,7 @@ public class exercises {
         Boolean exists = true;
         if (!sql.tableExists(tableName)) {
             HashMap<String, String> columns = new HashMap<>();
-            columns.put("exercice", "varchar(100)");
+            columns.put("exercise", "varchar(100)");
             columns.put("description", "text");
             columns.put("output", "text");
             columns.put("input", "text");

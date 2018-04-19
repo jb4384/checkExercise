@@ -105,83 +105,12 @@ public class exercises {
         }
     }
 
-    public String getHeader1() {
-        return header1;
-    }
-
-    public void setHeader1(String header1) {
-        this.header1 = header1;
-        updateExes();
-    }
-
-    public String getSelectedName() {
-        return selectedName;
-    }
-
-    public void setSelectedName(String selectedName) {
-        this.selectedName = selectedName;
-    }
-
     public void changeSelectedName(ValueChangeEvent event) {
         selectedName = event.getNewValue().toString();
         if (selectedName.length() < 2) {
             selectedName = "0" + selectedName;
         }
         updateExes();
-    }
-
-    public String getSelectedExercise() {
-        return selectedExercise;
-    }
-
-    public void setSelectedExercise(String selectedExercise) {
-        this.selectedExercise = selectedExercise;
-    }
-
-    public void changeSelectedExercise(ValueChangeEvent event) {
-        selectedExercise = event.getNewValue().toString();
-    }
-
-    public List<SelectItem> getNames() {
-        return names;
-    }
-
-    public List<SelectItem> getExes() {
-        return exes;
-    }
-
-    public String getCompile() {
-        return compile;
-    }
-
-    public void setCompile(String compile) {
-        this.compile = compile;
-    }
-
-    public String getProgram() {
-        return program;
-    }
-
-    public void setProgram(String program) {
-        this.program = program;
-    }
-
-    public Boolean getResultHide() {
-        return resultHide;
-    }
-
-    public void setResultHide(Boolean resultHide) {
-        this.resultHide = resultHide;
-    }
-
-    public void compileProgram() {
-        resultHide = true;
-        //Compile and execute program for input
-        if (hide) {
-            compile = "There is input";
-        } else {
-            compile = "There is no input";
-        }
     }
 
     private void updateProgram() {
@@ -207,54 +136,6 @@ public class exercises {
 
     }
 
-    public String getOutput() {
-        return output;
-    }
-
-    public void setOutput(String output) {
-        this.output = output;
-    }
-
-    public String getInput() {
-        return input;
-    }
-
-    public void setInput(String input) {
-        this.input = input;
-    }
-
-    public String getInputDisplay() {
-        return inputDisplay;
-    }
-
-    public void setInputDisplay(String inputDisplay) {
-        this.inputDisplay = inputDisplay;
-    }
-
-    public Boolean getHide() {
-        return hide;
-    }
-
-    public void setHide(Boolean hide) {
-        this.hide = hide;
-    }
-
-    public Boolean getOtherHide() {
-        return otherHide;
-    }
-
-    public void setOtherHide(Boolean otherHide) {
-        this.otherHide = otherHide;
-    }
-
-    public Boolean getCheckHide() {
-        return checkHide;
-    }
-
-    public void setCheckHide(Boolean checkHide) {
-        this.checkHide = checkHide;
-    }
-    
     private void updateInfo() {
         output = "";
         input = "";
@@ -335,6 +216,87 @@ public class exercises {
         updateInfo();
     }
 
+    public void compileProgram() {
+        resultHide = true;
+        //Hide == true -> Compile and execute program with input
+        if (hide) {
+            compile = "?????????????" + program;
+        } else { //Hide == false -> Compile and execute program with no input
+            compile = program;
+            //need to write string into java
+//            Output output = compileProgram("javac", "C:\\Users\\Tiffany\\Downloads", "Exercise02_01.java");
+//            output = executeProgram("java", "Exercise02_01",
+//                    "C:\\Users\\Tiffany\\Downloads", "C:\\Users\\Tiffany\\Downloads\\Exercise02_01a.input",
+//                    "C:\\Users\\Tiffany\\Downloads\\Exercise02_01a.output");
+        }
+    }
+
+    public static Output compileProgram(String command,
+            String sourceDirectory, String program) {
+
+        final Output result = new Output();
+        ProcessBuilder pb;
+
+        pb = new ProcessBuilder(command, "-classpath", ".;c:\\book",
+                "-Xlint:unchecked", "-nowarn", "-XDignore.symbol.file", program);
+        pb.directory(new File(sourceDirectory));
+        long startTime = System.currentTimeMillis();
+        Process proc = null;
+
+        try {
+            proc = pb.start();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        // This separate thread destroy the process if it takes too long time
+        final Process proc1 = proc;
+
+        new Thread() {
+            public void run() {
+                Scanner scanner1 = new Scanner(proc1.getInputStream());
+
+                while (scanner1.hasNext()) {
+                    result.output += scanner1.nextLine().replaceAll(" ", "&nbsp;") + "\n";
+                    //  scanner1.close(); // You could have closed it too soon
+                }
+            }
+        }.start();
+
+        new Thread() {
+            public void run() {
+                // Process output from proc
+                Scanner scanner2 = new Scanner(proc1.getErrorStream());
+
+                while (scanner2.hasNext()) {
+                    result.error += scanner2.nextLine() + "\n";
+                }
+                // scanner2.close(); // You could have closed it too soon
+            }
+        }.start();
+
+        try {
+            //Wait for the external process to finish
+            int exitCode = proc.waitFor();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        result.output.replaceAll(" ", "&nbsp;");
+        result.error.replaceAll(" ", "&nbsp;");
+
+        // Ignore warnings
+        if (result.error.indexOf("error") < 0) {
+            result.error = "";
+        }
+
+//        if (result.error.indexOf("error") >= 0 || result.error.indexOf("Error") >= 0)
+//          result.error = "";
+        result.timeUsed = (int) (System.currentTimeMillis() - startTime);
+        return result;
+
+    }
+
     public static Output executeProgram(String command, String program,
             String programDirectory, String inputFile, String outputFile) {
 
@@ -405,77 +367,120 @@ public class exercises {
 
     }
 
-    public static Output compileProgram(String command,
-            String sourceDirectory, String program) {
-
-        final Output result = new Output();
-        ProcessBuilder pb;
-
-        pb = new ProcessBuilder(command, "-classpath", ".;c:\\book",
-                "-Xlint:unchecked", "-nowarn", "-XDignore.symbol.file", program);
-        pb.directory(new File(sourceDirectory));
-        long startTime = System.currentTimeMillis();
-        Process proc = null;
-
-        try {
-            proc = pb.start();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        // This separate thread destroy the process if it takes too long time
-        final Process proc1 = proc;
-
-        new Thread() {
-            public void run() {
-                Scanner scanner1 = new Scanner(proc1.getInputStream());
-
-                while (scanner1.hasNext()) {
-                    result.output += scanner1.nextLine().replaceAll(" ", "&nbsp;") + "\n";
-                    //  scanner1.close(); // You could have closed it too soon
-                }
-            }
-        }.start();
-
-        new Thread() {
-            public void run() {
-                // Process output from proc
-                Scanner scanner2 = new Scanner(proc1.getErrorStream());
-
-                while (scanner2.hasNext()) {
-                    result.error += scanner2.nextLine() + "\n";
-                }
-                // scanner2.close(); // You could have closed it too soon
-            }
-        }.start();
-
-        try {
-            //Wait for the external process to finish
-            int exitCode = proc.waitFor();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        result.output.replaceAll(" ", "&nbsp;");
-        result.error.replaceAll(" ", "&nbsp;");
-
-        // Ignore warnings
-        if (result.error.indexOf("error") < 0) {
-            result.error = "";
-        }
-
-//        if (result.error.indexOf("error") >= 0 || result.error.indexOf("Error") >= 0)
-//          result.error = "";
-        result.timeUsed = (int) (System.currentTimeMillis() - startTime);
-        return result;
-
-    }
-
     public static class Output {
 
         public String output = "";
         public String error = "";
         public boolean isInfiniteLoop = false;
         public int timeUsed = 100;
+    }
+
+    public String getHeader1() {
+        return header1;
+    }
+
+    public void setHeader1(String header1) {
+        this.header1 = header1;
+        updateExes();
+    }
+
+    public String getSelectedName() {
+        return selectedName;
+    }
+
+    public void setSelectedName(String selectedName) {
+        this.selectedName = selectedName;
+    }
+
+    public String getSelectedExercise() {
+        return selectedExercise;
+    }
+
+    public void setSelectedExercise(String selectedExercise) {
+        this.selectedExercise = selectedExercise;
+    }
+
+    public void changeSelectedExercise(ValueChangeEvent event) {
+        selectedExercise = event.getNewValue().toString();
+    }
+
+    public List<SelectItem> getNames() {
+        return names;
+    }
+
+    public List<SelectItem> getExes() {
+        return exes;
+    }
+
+    public String getCompile() {
+        return compile;
+    }
+
+    public void setCompile(String compile) {
+        this.compile = compile;
+    }
+
+    public String getProgram() {
+        return program;
+    }
+
+    public void setProgram(String program) {
+        this.program = program;
+    }
+
+    public Boolean getResultHide() {
+        return resultHide;
+    }
+
+    public void setResultHide(Boolean resultHide) {
+        this.resultHide = resultHide;
+    }
+
+    public String getOutput() {
+        return output;
+    }
+
+    public void setOutput(String output) {
+        this.output = output;
+    }
+
+    public String getInput() {
+        return input;
+    }
+
+    public void setInput(String input) {
+        this.input = input;
+    }
+
+    public String getInputDisplay() {
+        return inputDisplay;
+    }
+
+    public void setInputDisplay(String inputDisplay) {
+        this.inputDisplay = inputDisplay;
+    }
+
+    public Boolean getHide() {
+        return hide;
+    }
+
+    public void setHide(Boolean hide) {
+        this.hide = hide;
+    }
+
+    public Boolean getOtherHide() {
+        return otherHide;
+    }
+
+    public void setOtherHide(Boolean otherHide) {
+        this.otherHide = otherHide;
+    }
+
+    public Boolean getCheckHide() {
+        return checkHide;
+    }
+
+    public void setCheckHide(Boolean checkHide) {
+        this.checkHide = checkHide;
     }
 }

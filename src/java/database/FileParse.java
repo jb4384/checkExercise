@@ -9,12 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import static java.nio.file.Files.list;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,7 +28,9 @@ public class FileParse {
     public static void main(String[] args) {
         SQLConnector sql = new SQLConnector();
         sql.createDatabase();
-
+        new exercises().createTable();
+        
+        if (1==1) System.exit(0);
         items = new ArrayList<>();
         if (!(new exercises().createTable())) {
             System.out.println("Table Created");
@@ -60,9 +58,8 @@ public class FileParse {
                     ex.setDescription(parseFile(path + "exercisedescription\\" + baseName));
                     ex.setOutput(parseFile(path + "gradeexercise\\" + outfile));
                     ex.setInput(parseFile(path + "gradeexercise\\" + infile));
-                    items.add(ex);
+                    System.out.println(ex.toString());
                 });
-                insert();
             } catch (IOException ex) {
             }
         } else {
@@ -85,32 +82,4 @@ public class FileParse {
         }
         return text;
     }
-
-    private static void insert() {
-        SQLConnector sql = new SQLConnector();
-        String SQL_INSERT = "replace into exercises ("
-                + "exercise,description,input,output)"
-                + "values (?,?,?,?)";
-        try {
-            Connection con = sql.getConnection();
-            int i = 0;
-            PreparedStatement statement = con.prepareStatement(SQL_INSERT);
-            con.setAutoCommit(false);
-
-            for (exercises ex : items) {
-                statement.setString(1, ex.getExercise());
-                statement.setString(2, ex.getDescription());
-                statement.setString(3, ex.getInput());
-                statement.setString(4, ex.getOutput());
-                statement.addBatch();             
-            }
-            statement.executeBatch();
-            
-            con.commit();
-            con.close();
-        } catch (SQLException e) {
-            System.out.println(e.getLocalizedMessage());
-        }
-    }
-    
 }

@@ -8,9 +8,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
@@ -60,17 +63,18 @@ public class exercises {
     @PostConstruct
     public void init() {
         webinf = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/WEB-INF");
-        ags10e = new File(webinf + "/../../../ags10e").toString();
+        ags10e = new File(webinf + "/../../../ags10e").toString() + "\\";
         buildChapters();
         updateExes();
         header1 = selectedExercise;
         updateProgram();
+        hide = false;
     }
 
     public void buildChapters() {
         names = new ArrayList<>();
         chapters = new TreeSet<>();
-        buildFiles("/exercisedescription/", "");
+        buildFiles("exercisedescription/", "");
         files.forEach((File file) -> {
             String ch = file.getName().split("_")[0].trim().replaceAll("[^0-9]", "");
             chapters.add(Integer.parseInt(ch));
@@ -82,7 +86,7 @@ public class exercises {
 
     public void updateExes() {
         exes = new ArrayList<>();
-        buildFiles("/exercisedescription/", "Exercise" + selectedName);
+        buildFiles("exercisedescription/", "Exercise" + selectedName);
         files.forEach((File file) -> {
             if (selectedExercise.isEmpty()) {
                 selectedExercise = file.getName();
@@ -116,7 +120,7 @@ public class exercises {
     private void updateProgram() {
         resultHide = false;
         program = "";
-        String fileName = ags10e + "/exercisedescription/" + header1;
+        String fileName = ags10e + "exercisedescription/" + header1;
         parseFile(fileName);
         if (fileInfo.replaceAll("[^A-Za-z ]", "").trim().equalsIgnoreCase("programming exercise")
                 || fileInfo.startsWith("Programming Exercise")
@@ -142,7 +146,7 @@ public class exercises {
         inputDisplay = "";
         System.out.println("update file info");
         System.out.println();
-        buildFiles("/gradeexercise/", header1);
+        buildFiles("gradeexercise/", header1);
         files.forEach((File file) -> {
             String fileName = file.getAbsolutePath();
             Boolean cntn = true;
@@ -187,6 +191,7 @@ public class exercises {
             hide = false;
             checkHide = true;
         }
+        purgeDirectory(new File(ags10e + "\\run"));
     }
 
     private void parseFile(String fileName) {
@@ -216,18 +221,33 @@ public class exercises {
         updateInfo();
     }
 
+    private void purgeDirectory(File dir) {
+        System.out.println("purge directory");
+        System.out.println(Arrays.toString(dir.listFiles()));
+        for (File file : dir.listFiles()) {
+            file.delete();
+        }
+    }
+
     public void compileProgram() {
-        resultHide = true;
-        //Hide == true -> Compile and execute program with input
-        if (hide) {
-            compile = program;
-        } else { //Hide == false -> Compile and execute program with no input
-            compile = program;
-            //need to write string into java
-//            Output output = compileProgram("javac", "C:\\Users\\Tiffany\\Downloads", "Exercise02_01.java");
+        try {
+            resultHide = true;
+            //Hide == true -> Compile and execute program with input
+            String path = ags10e + "\\run\\" + header1 + ".java";
+            File file = new File(path);
+            file.delete();
+            Files.write(Paths.get(path), program.getBytes(), StandardOpenOption.CREATE);
+            if (hide) {
+                compile = program;
+            } else { //Hide == false -> Compile and execute program with no input
+                compile = program;
+                //need to write string into java
+                //Output output = compileProgram("javac", ags10e+"run", "Exercise02_01.java");
 //            output = executeProgram("java", "Exercise02_01",
 //                    "C:\\Users\\Tiffany\\Downloads", "C:\\Users\\Tiffany\\Downloads\\Exercise02_01a.input",
 //                    "C:\\Users\\Tiffany\\Downloads\\Exercise02_01a.output");
+            }
+        } catch (IOException ex) {
         }
     }
 
@@ -483,4 +503,5 @@ public class exercises {
     public void setCheckHide(Boolean checkHide) {
         this.checkHide = checkHide;
     }
+
 }

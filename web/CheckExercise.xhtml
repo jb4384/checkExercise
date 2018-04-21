@@ -152,7 +152,7 @@
 
             <h:panelGrid id = "bigPanel" style='width:100%; margin-right: 0 auto;'>
                 <h:outputLabel id = "header1" class = "header" style='width:100%; margin-right: 0 auto;'
-                               value="CheckExercise: #{exercises.header1}" />
+                               value="CheckExercise: #{exercises.header1}.java" />
                 <h:panelGrid columns="1" 
                              style="margin-top: 1px; padding: 2px; width:575px; background-color: white; 
                              border: 1px solid #f6912f; font-weight: bold; font-size: 96%;
@@ -187,8 +187,8 @@
                                      action="#{exercises.buildProgram()}"/> &nbsp;
                     <h:commandButton rendered="#{exercises.checkHide}" value="Automatic Check" class="btn btn-sm btn-primary" style ="font-style: normal; font-weight: normal; font-size: 100%"/>
                 </h:panelGroup>
-                
-                <!--I think this is the unedit textbox-->
+                <h:outputLabel style="font-weight: bold;">Enter input data for the program (Sample data provided below. You may modify it.)</h:outputLabel>
+                <!--This area is to hold the results from the compiler-->
                 <h:inputTextarea rendered="#{exercises.resultHide}" readonly="true" style="text-align: left; font-family: courier; width:100%; height:200px; font-weight: bold; margin: 0 auto;
                                  font-size: 90%; color: black; background-color: white; border: 1px solid; border-color: #f6912f;" value = "#{exercises.compile}" />
 
@@ -197,7 +197,7 @@
                     <span style="width:100%; margin: 0 auto; height: 500px;">
                         <div style = 'width:575px; margin-top:-10px; width:100%; margin: 0 auto;'>
                             <div>
-                                <span style='font-style:bold;color:#e31c3d'>We recommend that you use this tool to test the code. If your code is wrong, the tool will display your output and the correct output so to help you debug the error.</span>
+                                <span style='font-style:bold;color:#e31c3d;'>We recommend that you use this tool to test the code. If your code is wrong, the tool will display your output and the correct output so to help you debug the error.</span>
                                 <br/>Compile/Run is provided for your convenience to compile and run the code. The extra exercises are available for instructors. 
                             </div>
                         </div>
@@ -205,6 +205,7 @@
                 </span>
                 <div class="messageStyle" style="width:100%; margin: 0 auto;">Rapid Development Project by Joshua Barney, Keyur Patel, and Tiffany Tran :)
                 </div>
+                <!--This is the area where the program will be actually read from-->
                 <h:inputTextarea id="sourceInputTextarea" rendered ="true" required="true"
                                  value="#{exercises.program}" style="font-family: courier; width: 100%;
                                  font-weight: bold; margin-top: 0px;

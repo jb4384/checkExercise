@@ -263,9 +263,14 @@ public class exercises {
                 //Add Execute string
                 compile += "command> java " + header1 + "\n";
                 Scanner input = new Scanner(new File(outputFile));
-                while (input.hasNextLine()) {
-                    compile += input.nextLine() + "\n";
+                if (output.isInfiniteLoop) {
+                    compile += "Your program takes too long. It runs out of the allowed CPU time 10000ms. It may have an infinite loop or the expected input for the program is not provided or provided incorrectly.";
+                } else {
+                    while (input.hasNextLine()) {
+                        compile += input.nextLine() + "\n";
+                    }
                 }
+
             }
             compile += "\ncommand>\n";
 
@@ -388,11 +393,11 @@ public class exercises {
             }.start();
 
             int exitCode = proc.waitFor();
-
             result.timeUsed = (int) (System.currentTimeMillis() - startTime);
         } catch (IOException | InterruptedException ex) {
             ex.printStackTrace();
         }
+
         return result;
     }
 

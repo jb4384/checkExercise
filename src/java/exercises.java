@@ -121,6 +121,7 @@ public class exercises {
     }
 
     private void updateProgram() {
+        checkHide = true;
         resultHide = false;
         program = "";
         String fileName = ags10e + "exercisedescription/" + header1;
@@ -137,6 +138,7 @@ public class exercises {
         } else if (fileInfo.equalsIgnoreCase("This exercise can be compiled and submitted, but cannot be run and automatically graded.")) {
             program = "/* This exercise cannot be graded automatically because it may use random\n"
                     + "numbers, file input/output, or graphics. */";
+            checkHide = false;
         } else {
             program = "/* " + fileInfo + " */";
         }
@@ -144,6 +146,7 @@ public class exercises {
     }
 
     private void updateInfo() {
+        checkHide = true; //display automatic check
         output = "";
         input = "";
         inputDisplay = "";
@@ -175,13 +178,12 @@ public class exercises {
                     }
                     hide = true; // show input display box
                     otherHide = false; //hide 
-                    checkHide = true; //display automatic check
                 } else if (program.equals("/* This exercise cannot be graded automatically because it may use random\n"
                         + "numbers, file input/output, or graphics. */")) {
                     //If it cannot be graded, hide Automatic Check
                     inputDisplay = "This exercise cannot be auto graded. But you can still run it.";
                     hide = false;
-                    checkHide = true;
+                    checkHide = false;
                     otherHide = true;
                 }
             }

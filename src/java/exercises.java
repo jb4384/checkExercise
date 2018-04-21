@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
@@ -52,11 +50,13 @@ public class exercises {
     private String webinf;
     private String ags10e;
     private String fileInfo;
-    private String compile; //Holds the string from response
+    private String correct; //Holds the string if the program is correct or not.
+    private String compile; //Holds the string from compiler response
     private Boolean hide; //This hides 
     private Boolean otherHide;
-    private Boolean checkHide; //Hide the Automatic Check If gradeable = true, else = false;
+    private Boolean checkHide; //Hide the Automatic Check button. If gradeable = true, else = false;
     private Boolean resultHide;
+    private Boolean appearWhenAutomaticCheck; //Renders message if Automatic Check produces the correct result after you click Automatic Check. 
 
     final static int EXECUTION_TIME_ALLOWED = 1000;
     final static int EXECUTION_TIME_INTERVAL = 100;
@@ -71,6 +71,7 @@ public class exercises {
         header1 = selectedExercise;
         updateProgram();
         hide = false;
+        appearWhenAutomaticCheck = false;
     }
 
     public void buildChapters() {
@@ -221,6 +222,7 @@ public class exercises {
 
     public void submit() {
         header1 = selectedExercise;
+        appearWhenAutomaticCheck = false;
         updateProgram();
         updateInfo();
     }
@@ -277,6 +279,82 @@ public class exercises {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
+//#################################################################################################################################
+//#################################################################################################################################
+//#################################################################################################################################
+
+    public void checkProgram() {
+        //Build program first
+        purgeDirectory(new File(ags10e + "\\run"));
+        try {
+
+            //Hide == true -> Compile and execute program with input
+            String path = ags10e + "\\run\\" + header1 + ".java";
+            Files.createDirectories(Paths.get(ags10e + "\\run\\"));
+            Files.write(Paths.get(path), program.getBytes(), StandardOpenOption.CREATE);
+            Output outputer = compileProgram();
+
+            //Build compile output string
+            compile = "command> javac " + header1 + ".java\n";
+            compile += outputer.error + "\n\n";
+
+            if (outputer.error.equals("Compiled successful")) {
+                // check for input
+                String prefix = "a";
+                String inputFile = ags10e + "\\gradeexercise\\" + header1 + prefix + ".input";
+                Path p = Paths.get(inputFile);
+                boolean notExists = Files.notExists(p);
+                if (notExists) {
+                    inputFile = "";
+                    prefix = "";
+                }
+                String outputFile = ags10e + "\\run\\" + header1 + prefix + ".output";
+                outputer = executeProgram(inputFile, outputFile);
+
+                //Add Execute string
+                compile += "command> java " + header1 + "\n";
+                String compareString = "";
+                Scanner input = new Scanner(new File(outputFile));
+                //If there is an infinite loop, display this message. Else,
+                //continue with comparing results.
+                if (outputer.isInfiniteLoop) {
+                    resultHide = true;
+                    compile += "Your program takes too long. It runs out of the allowed CPU time 10000ms. It may have an infinite loop or the expected input for the program is not provided or provided incorrectly.";
+                } else {
+                    while (input.hasNextLine()) {
+                        String temp = input.nextLine();
+                        compareString += temp;
+                        compile += temp + "\n";
+                        if (input.hasNext()) {
+                            compareString += "#";
+                        }
+                    }
+                    //Compare compile message with the output
+                    appearWhenAutomaticCheck = true;
+
+                    if (output.contentEquals(compareString)) {
+                        correct = "Your program is correct.";
+                        resultHide = false;
+                    } else {
+                        correct = "Your program is incorrect.";
+                        resultHide = true;
+                    }
+                    System.out.println(correct);
+                    System.out.println("Does the output contents equal compareString? " + output.contentEquals(compareString));
+                    System.out.println("Output: " + output);
+                    System.out.println("Compare String: " + compareString);
+
+                }
+                compile += "\ncommand>\n";
+
+            }
+
+//        If the program is correct, hide the compiler textarea box
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
     }
 
     private Output compileProgram() {
@@ -444,6 +522,22 @@ public class exercises {
 
     public List<SelectItem> getExes() {
         return exes;
+    }
+
+    public String getCorrect() {
+        return correct;
+    }
+
+    public void setCorrect(String correct) {
+        this.correct = correct;
+    }
+
+    public Boolean getAppearWhenAutomaticCheck() {
+        return appearWhenAutomaticCheck;
+    }
+
+    public void setAppearWhenAutomaticCheck(Boolean appearWhenAutomaticCheck) {
+        this.appearWhenAutomaticCheck = appearWhenAutomaticCheck;
     }
 
     public String getCompile() {

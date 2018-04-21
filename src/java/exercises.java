@@ -6,6 +6,7 @@
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ProcessBuilder.Redirect;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -242,7 +243,7 @@ public class exercises {
 
             System.out.println(output.error);
 
-            System.out.println("Result: " + output.output);
+            System.out.println("compile Result: " + output.output);
 
             // check for input
             String prefix = "a";
@@ -345,17 +346,15 @@ public class exercises {
         ProcessBuilder pb;
         try {
             new File(outputFile).createNewFile();
-            System.out.println(System.getProperty("java.home"));
-            System.out.println(System.getenv());
             // For Java security, added c:/etext.policy in c:\program files\jre\bin\security\java.security
             pb = new ProcessBuilder(command, program);
             pb.directory(new File(programDirectory));
             pb.redirectErrorStream(true);
-            if (inputFile != null) {
-                pb.redirectInput(ProcessBuilder.Redirect.from(new File(inputFile)));
+            if (inputFile.length() > 0) {
+                pb.redirectInput(Redirect.from(new File(inputFile)));
             }
 
-            pb.redirectOutput(ProcessBuilder.Redirect.to(new File(outputFile)));
+            pb.redirectOutput(Redirect.to(new File(outputFile)));
             long startTime = System.currentTimeMillis();
             Process proc = null;
 
@@ -372,23 +371,18 @@ public class exercises {
                     while (sleepTime <= EXECUTION_TIME_ALLOWED && !isFinished) {
                         try {
                             Thread.sleep(EXECUTION_TIME_INTERVAL);
-
-//                System.out.println("sleepTime " + sleepTime);
                             sleepTime += EXECUTION_TIME_INTERVAL;
-                            int exitValue = proc1.exitValue();
-                            isFinished = true;
-
-//                System.out.println("exitValue " + exitValue);
+                            if (!proc1.isAlive()) {
+                                int exitValue = proc1.exitValue();
+                                isFinished = true;
+                            }
                         } catch (IllegalThreadStateException | InterruptedException ex) {
                             ex.printStackTrace();
                         }
                     }
-
                     if (!isFinished) {
                         proc1.destroy();
                         result.isInfiniteLoop = true;
-
-//            System.out.println("Infinite loop");
                     }
                 }
             }.start();

@@ -189,7 +189,7 @@
                 </h:panelGroup>
                 
                 <!--I think this is the unedit textbox-->
-                <h:inputTextarea rendered="#{exercises.resultHide}" readonly="true" style="text-align: left; font-family: courier; width:100%; height:75px; font-weight: bold; margin: 0 auto;
+                <h:inputTextarea rendered="#{exercises.resultHide}" readonly="true" style="text-align: left; font-family: courier; width:100%; height:200px; font-weight: bold; margin: 0 auto;
                                  font-size: 90%; color: black; background-color: white; border: 1px solid; border-color: #f6912f;" value = "#{exercises.compile}" />
 
                 <span style="text-align: left; width:575px;  max-width:575px; font-weight: normal; font-size: 96%; color: black; background-color: white;
@@ -197,9 +197,8 @@
                     <span style="width:100%; margin: 0 auto; height: 500px;">
                         <div style = 'width:575px; margin-top:-10px; width:100%; margin: 0 auto;'>
                             <div>
-                                <span style='font-style:bold;color:#e31c3d'>We recommend that you use this tool to test the code. If your code is wrong, the tool will display your output and the correct output so to help you debug the error.</span> Compile/Run is provided for your convenience to compile and run the code. The extra exercises are available for instructors. Email <a href="mailto:y.daniel.liang@gmail.com" 
-                                                                                                                                                                                                        style="text-decoration: none; color: green">Dr. Liang</a>
-                                to request a copy of the extra exercises.
+                                <span style='font-style:bold;color:#e31c3d'>We recommend that you use this tool to test the code. If your code is wrong, the tool will display your output and the correct output so to help you debug the error.</span>
+                                <br/>Compile/Run is provided for your convenience to compile and run the code. The extra exercises are available for instructors. 
                             </div>
                         </div>
                     </span>
@@ -209,7 +208,7 @@
                 <h:inputTextarea id="sourceInputTextarea" rendered ="true" required="true"
                                  value="#{exercises.program}" style="font-family: courier; width: 100%;
                                  font-weight: bold; margin-top: 0px;
-                                 height:100px; background-color: white; border: 0px solid #f6912f;
+                                 height:0px; background-color: white; border: 0px solid #f6912f;
                                  font-size: 96%; overflow:hidden; resize:none;  margin: 0 auto;">
                 </h:inputTextarea>
             </h:panelGrid>

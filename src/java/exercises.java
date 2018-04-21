@@ -240,35 +240,37 @@ public class exercises {
             Files.createDirectories(Paths.get(ags10e + "\\run\\"));
             Files.write(Paths.get(path), program.getBytes(), StandardOpenOption.CREATE);
             Output output = compileProgram();
-
-            System.out.println(output.error);
-
-            System.out.println("compile Result: " + output.output);
-
+            
+            //Build compile output string
+            compile = "command> javac " + header1 + ".java\n";
+            compile += output.error + "\n\n";
+            
             // check for input
             String prefix = "a";
             String inputFile = ags10e + "\\gradeexercise\\" + header1 + prefix + ".input";
             Path p = Paths.get(inputFile);
             boolean notExists = Files.notExists(p);
-            System.out.println(notExists);
-            System.out.println(header1);
             if (notExists) {
                 inputFile = "";
                 prefix = "";
             }
             String outputFile = ags10e + "\\run\\" + header1 + prefix + ".output";
-
             output = executeProgram(inputFile, outputFile);
 
-            System.out.println(output.error);
+            //Add Execute string
+            compile += "command> java " + header1 + "\n";
+            Scanner input = new Scanner(new File(outputFile));
+            while (input.hasNextLine()) {
+                compile += input.nextLine()+ "\n";
+            }
+            compile += "\ncommand>\n";
 
-            System.out.println("Result: " + output.output);
-            if (hide) {
+            /*if (hide) {
                 compile = program;
             } else { //Hide == false -> Compile and execute program with no input
                 compile = program;
                 //need to write string into java
-            }
+            }*/
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -324,7 +326,7 @@ public class exercises {
 
             // Ignore warnings
             if (result.error.indexOf("error") < 0) {
-                result.error = "";
+                result.error = "Compiled successful";
             }
 
 //        if (result.error.indexOf("error") >= 0 || result.error.indexOf("Error") >= 0)

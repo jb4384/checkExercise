@@ -194,7 +194,6 @@ public class exercises {
             hide = false;
             checkHide = true;
         }
-        purgeDirectory(new File(ags10e + "\\run"));
     }
 
     private void parseFile(String fileName) {
@@ -233,6 +232,7 @@ public class exercises {
     }
 
     public void buildProgram() {
+        purgeDirectory(new File(ags10e + "\\run"));
         try {
             resultHide = true;
             //Hide == true -> Compile and execute program with input
@@ -240,37 +240,33 @@ public class exercises {
             Files.createDirectories(Paths.get(ags10e + "\\run\\"));
             Files.write(Paths.get(path), program.getBytes(), StandardOpenOption.CREATE);
             Output output = compileProgram();
-            
+
             //Build compile output string
             compile = "command> javac " + header1 + ".java\n";
             compile += output.error + "\n\n";
-            
-            // check for input
-            String prefix = "a";
-            String inputFile = ags10e + "\\gradeexercise\\" + header1 + prefix + ".input";
-            Path p = Paths.get(inputFile);
-            boolean notExists = Files.notExists(p);
-            if (notExists) {
-                inputFile = "";
-                prefix = "";
-            }
-            String outputFile = ags10e + "\\run\\" + header1 + prefix + ".output";
-            output = executeProgram(inputFile, outputFile);
 
-            //Add Execute string
-            compile += "command> java " + header1 + "\n";
-            Scanner input = new Scanner(new File(outputFile));
-            while (input.hasNextLine()) {
-                compile += input.nextLine()+ "\n";
+            if (output.error.equals("Compiled successful")) {
+                // check for input
+                String prefix = "a";
+                String inputFile = ags10e + "\\gradeexercise\\" + header1 + prefix + ".input";
+                Path p = Paths.get(inputFile);
+                boolean notExists = Files.notExists(p);
+                if (notExists) {
+                    inputFile = "";
+                    prefix = "";
+                }
+                String outputFile = ags10e + "\\run\\" + header1 + prefix + ".output";
+                output = executeProgram(inputFile, outputFile);
+
+                //Add Execute string
+                compile += "command> java " + header1 + "\n";
+                Scanner input = new Scanner(new File(outputFile));
+                while (input.hasNextLine()) {
+                    compile += input.nextLine() + "\n";
+                }
             }
             compile += "\ncommand>\n";
 
-            /*if (hide) {
-                compile = program;
-            } else { //Hide == false -> Compile and execute program with no input
-                compile = program;
-                //need to write string into java
-            }*/
         } catch (IOException ex) {
             ex.printStackTrace();
         }

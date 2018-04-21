@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -18,13 +17,14 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 import javax.faces.bean.ManagedBean;
-import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 
@@ -62,8 +62,9 @@ public class exercises {
 
     @PostConstruct
     public void init() {
-        webinf = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/WEB-INF");
-        ags10e = new File(webinf + "/../../../ags10e").toString() + "\\";
+        //webinf = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/WEB-INF");
+        //ags10e = new File(webinf + "/../../../ags10e").toString() + "\\";
+        ags10e = "c:\\ags10e\\";
         buildChapters();
         updateExes();
         header1 = selectedExercise;
@@ -99,6 +100,7 @@ public class exercises {
         try {
             System.out.println(startsWith);
             System.out.println(endPath);
+            System.out.println(ags10e + endPath);
             files = Files.walk(Paths.get(ags10e + endPath))
                     .filter(Files::isRegularFile)
                     .map(Path::toFile)
@@ -229,162 +231,175 @@ public class exercises {
         }
     }
 
-    public void compileProgram() {
+    public void buildProgram() {
         try {
             resultHide = true;
             //Hide == true -> Compile and execute program with input
             String path = ags10e + "\\run\\" + header1 + ".java";
-            File file = new File(path);
-            file.delete();
+            Files.createDirectories(Paths.get(ags10e + "\\run\\"));
             Files.write(Paths.get(path), program.getBytes(), StandardOpenOption.CREATE);
+            Output output = compileProgram();
+
+            System.out.println(output.error);
+
+            System.out.println("Result: " + output.output);
+
+            // check for input
+            String prefix = "a";
+            String inputFile = ags10e + "\\gradeexercise\\" + header1 + prefix + ".input";
+            Path p = Paths.get(inputFile);
+            boolean notExists = Files.notExists(p);
+            System.out.println(notExists);
+            System.out.println(header1);
+            if (notExists) {
+                inputFile = "";
+                prefix = "";
+            }
+            String outputFile = ags10e + "\\run\\" + header1 + prefix + ".output";
+
+            output = executeProgram(inputFile, outputFile);
+
+            System.out.println(output.error);
+
+            System.out.println("Result: " + output.output);
             if (hide) {
                 compile = program;
             } else { //Hide == false -> Compile and execute program with no input
                 compile = program;
                 //need to write string into java
-                //Output output = compileProgram("javac", ags10e+"run", "Exercise02_01.java");
-//            output = executeProgram("java", "Exercise02_01",
-//                    "C:\\Users\\Tiffany\\Downloads", "C:\\Users\\Tiffany\\Downloads\\Exercise02_01a.input",
-//                    "C:\\Users\\Tiffany\\Downloads\\Exercise02_01a.output");
             }
         } catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
 
-    public static Output compileProgram(String command,
-            String sourceDirectory, String program) {
-
+    private Output compileProgram() {
+        String command = "javac";
+        String sourceDirectory = ags10e + "\\run\\";
+        String program = header1 + ".java";
         final Output result = new Output();
         ProcessBuilder pb;
-
-        pb = new ProcessBuilder(command, "-classpath", ".;c:\\book",
-                "-Xlint:unchecked", "-nowarn", "-XDignore.symbol.file", program);
-        pb.directory(new File(sourceDirectory));
-        long startTime = System.currentTimeMillis();
-        Process proc = null;
-
         try {
+
+            pb = new ProcessBuilder(command, "-classpath", ".;c:\\book",
+                    "-Xlint:unchecked", "-nowarn", "-XDignore.symbol.file", program);
+            pb.directory(new File(sourceDirectory));
+            long startTime = System.currentTimeMillis();
+            Process proc = null;
+
             proc = pb.start();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
 
-        // This separate thread destroy the process if it takes too long time
-        final Process proc1 = proc;
+            // This separate thread destroy the process if it takes too long time
+            final Process proc1 = proc;
 
-        new Thread() {
-            public void run() {
-                Scanner scanner1 = new Scanner(proc1.getInputStream());
+            new Thread() {
+                public void run() {
+                    Scanner scanner1 = new Scanner(proc1.getInputStream());
 
-                while (scanner1.hasNext()) {
-                    result.output += scanner1.nextLine().replaceAll(" ", "&nbsp;") + "\n";
-                    //  scanner1.close(); // You could have closed it too soon
+                    while (scanner1.hasNext()) {
+                        result.output += scanner1.nextLine().replaceAll(" ", "&nbsp;") + "\n";
+                        //  scanner1.close(); // You could have closed it too soon
+                    }
                 }
-            }
-        }.start();
+            }.start();
 
-        new Thread() {
-            public void run() {
-                // Process output from proc
-                Scanner scanner2 = new Scanner(proc1.getErrorStream());
+            new Thread() {
+                public void run() {
+                    // Process output from proc
+                    Scanner scanner2 = new Scanner(proc1.getErrorStream());
 
-                while (scanner2.hasNext()) {
-                    result.error += scanner2.nextLine() + "\n";
+                    while (scanner2.hasNext()) {
+                        result.error += scanner2.nextLine() + "\n";
+                    }
+                    // scanner2.close(); // You could have closed it too soon
                 }
-                // scanner2.close(); // You could have closed it too soon
-            }
-        }.start();
+            }.start();
 
-        try {
             //Wait for the external process to finish
             int exitCode = proc.waitFor();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
 
-        result.output.replaceAll(" ", "&nbsp;");
-        result.error.replaceAll(" ", "&nbsp;");
+            result.output.replaceAll(" ", "&nbsp;");
+            result.error.replaceAll(" ", "&nbsp;");
 
-        // Ignore warnings
-        if (result.error.indexOf("error") < 0) {
-            result.error = "";
-        }
+            // Ignore warnings
+            if (result.error.indexOf("error") < 0) {
+                result.error = "";
+            }
 
 //        if (result.error.indexOf("error") >= 0 || result.error.indexOf("Error") >= 0)
 //          result.error = "";
-        result.timeUsed = (int) (System.currentTimeMillis() - startTime);
+            result.timeUsed = (int) (System.currentTimeMillis() - startTime);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
         return result;
 
     }
 
-    public static Output executeProgram(String command, String program,
-            String programDirectory, String inputFile, String outputFile) {
-
+    private Output executeProgram(String inputFile, String outputFile) {
+        String command = "java";
+        String program = header1;
+        String programDirectory = ags10e + "\\run\\";
         final Output result = new Output();
         ProcessBuilder pb;
-
-        // For Java security, added c:/etext.policy in c:\program files\jre\bin\security\java.security
-        pb = new ProcessBuilder(command, "-Djava.security.manager", program);
-        pb.directory(new File(programDirectory));
-        pb.redirectErrorStream(true);
-        if (inputFile != null) {
-            pb.redirectInput(ProcessBuilder.Redirect.from(new File(inputFile)));
-        }
-
-        pb.redirectOutput(ProcessBuilder.Redirect.to(new File(outputFile)));
-        long startTime = System.currentTimeMillis();
-        Process proc = null;
-
         try {
+            new File(outputFile).createNewFile();
+            System.out.println(System.getProperty("java.home"));
+            System.out.println(System.getenv());
+            // For Java security, added c:/etext.policy in c:\program files\jre\bin\security\java.security
+            pb = new ProcessBuilder(command, program);
+            pb.directory(new File(programDirectory));
+            pb.redirectErrorStream(true);
+            if (inputFile != null) {
+                pb.redirectInput(ProcessBuilder.Redirect.from(new File(inputFile)));
+            }
+
+            pb.redirectOutput(ProcessBuilder.Redirect.to(new File(outputFile)));
+            long startTime = System.currentTimeMillis();
+            Process proc = null;
+
             proc = pb.start();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
 
-        // This separate thread destroy the process if it takes too long time
-        final Process proc1 = proc;
+            // This separate thread destroy the process if it takes too long time
+            final Process proc1 = proc;
 
-        new Thread() {
-            public void run() {
-                int sleepTime = 0;
-                boolean isFinished = false;
+            new Thread() {
+                public void run() {
+                    int sleepTime = 0;
+                    boolean isFinished = false;
 
-                while (sleepTime <= EXECUTION_TIME_ALLOWED && !isFinished) {
-                    try {
+                    while (sleepTime <= EXECUTION_TIME_ALLOWED && !isFinished) {
                         try {
                             Thread.sleep(EXECUTION_TIME_INTERVAL);
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
 
 //                System.out.println("sleepTime " + sleepTime);
-                        sleepTime += EXECUTION_TIME_INTERVAL;
-                        int exitValue = proc1.exitValue();
-                        isFinished = true;
+                            sleepTime += EXECUTION_TIME_INTERVAL;
+                            int exitValue = proc1.exitValue();
+                            isFinished = true;
 
 //                System.out.println("exitValue " + exitValue);
-                    } catch (IllegalThreadStateException ex) {
+                        } catch (IllegalThreadStateException | InterruptedException ex) {
+                            ex.printStackTrace();
+                        }
                     }
-                }
 
-                if (!isFinished) {
-                    proc1.destroy();
-                    result.isInfiniteLoop = true;
+                    if (!isFinished) {
+                        proc1.destroy();
+                        result.isInfiniteLoop = true;
 
 //            System.out.println("Infinite loop");
+                    }
                 }
-            }
-        }.start();
+            }.start();
 
-        try {
             int exitCode = proc.waitFor();
-        } catch (Exception ex) {
+
+            result.timeUsed = (int) (System.currentTimeMillis() - startTime);
+        } catch (IOException | InterruptedException ex) {
             ex.printStackTrace();
         }
-
-        result.timeUsed = (int) (System.currentTimeMillis() - startTime);
         return result;
-
     }
 
     public static class Output {

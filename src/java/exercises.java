@@ -55,6 +55,7 @@ public class exercises {
     private String fileInfo;
     private String correct; //Holds the string if the program is correct or not.
     private String compile; //Holds the string from compiler response
+    private String compareString; //Holds the string of the user's output
     private Boolean hide; //This hides 
     private Boolean otherHide;
     private Boolean checkHide; //Hide the Automatic Check button. If gradeable = true, else = false;
@@ -334,7 +335,7 @@ public class exercises {
 
                             //Add Execute string
                             compile += "command> java " + header1 + "\n";
-                            String compareString = "";
+                            compareString = "";
                             Scanner input = new Scanner(new File(outputFile));
                             //If there is an infinite loop, display this message. Else,
                             //continue with comparing results.
@@ -656,6 +657,14 @@ public class exercises {
 
     public void setShowOutputHide(Boolean showOutputHide) {
         this.showOutputHide = showOutputHide;
+    }
+
+    public String getCompareString() {
+        return compareString;
+    }
+
+    public void setCompareString(String compareString) {
+        this.compareString = compareString;
     }
 
 }

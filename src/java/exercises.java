@@ -350,7 +350,7 @@ public class exercises {
                     }
                 });
                 String text = output.replaceAll("#", "");
-                text = text.replaceAll(".", "");
+                text = text.replaceAll("\\.", "");
                 if (text.matches("[0-9]+")) {
                     String testComp[] = output.split("#");
                     for (int i = 0; i < testComp.length; i++){
@@ -361,6 +361,8 @@ public class exercises {
                 }
             } else {
                 matches = false;
+                resultHide = true;
+                showOutputHide = false;
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -376,7 +378,6 @@ public class exercises {
             correct = "Your program is incorrect.";
             compareString = compareString.replaceAll("#", "\n");
             output = output.replaceAll("#", "\n");
-            resultHide = false;
             showOutputHide = true;
 
         }

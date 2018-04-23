@@ -379,9 +379,7 @@ public class exercises {
         } else {
             correct = "Your program is incorrect.";
             resultHide = true;
-            if (input.isEmpty()) {
-                showInputHide = true;
-            }
+            showInputHide = !input.isEmpty();
             showOutputHide = true;
         }
         System.out.println(correct);

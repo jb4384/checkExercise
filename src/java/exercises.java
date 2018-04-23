@@ -60,6 +60,8 @@ public class exercises {
     private Boolean checkHide; //Hide the Automatic Check button. If gradeable = true, else = false;
     private Boolean resultHide;
     private Boolean appearWhenAutomaticCheck; //Renders message if Automatic Check produces the correct result after you click Automatic Check. 
+    private Boolean showInputHide; //show actual input if it exists
+    private Boolean showOutputHide;
     private int count;
     private Boolean matches;
 
@@ -126,6 +128,8 @@ public class exercises {
     private void updateProgram() {
         checkHide = true;
         resultHide = false;
+        showInputHide = false;
+        showOutputHide = false;
         program = "";
         String fileName = ags10e + "exercisedescription/" + header1;
         parseFile(fileName);
@@ -238,6 +242,8 @@ public class exercises {
     }
 
     public void buildProgram() {
+        showInputHide = false;
+        showOutputHide = false;
         purgeDirectory(new File(ags10e + "\\run"));
         try {
             resultHide = true;
@@ -268,6 +274,7 @@ public class exercises {
                 compile += "command> java " + header1 + "\n";
                 Scanner input = new Scanner(new File(outputFile));
                 if (output.isInfiniteLoop) {
+                    appearWhenAutomaticCheck = false;
                     compile += "Your program takes too long. It runs out of the allowed CPU time 10000ms. It may have an infinite loop or the expected input for the program is not provided or provided incorrectly.";
                 } else {
                     while (input.hasNextLine()) {
@@ -293,6 +300,7 @@ public class exercises {
         System.out.println(output);
         //Build program first
         purgeDirectory(new File(ags10e + "\\run"));
+        hide = false;
         try {
             //Hide == true -> Compile and execute program with input
             String path = ags10e + "\\run\\" + header1 + ".java";
@@ -332,6 +340,9 @@ public class exercises {
                             //continue with comparing results.
                             if (outputer.isInfiniteLoop) {
                                 resultHide = true;
+                                showInputHide = false;
+                                showOutputHide = false;
+                                appearWhenAutomaticCheck = false;
                                 compile += "Your program takes too long. It runs out of the allowed CPU time 10000ms. It may have an infinite loop or the expected input for the program is not provided or provided incorrectly.";
                             } else {
                                 while (input.hasNextLine()) {
@@ -367,6 +378,10 @@ public class exercises {
         } else {
             correct = "Your program is incorrect.";
             resultHide = true;
+            if (input.isEmpty()) {
+                showInputHide = true;
+            }
+            showOutputHide = true;
         }
         System.out.println(correct);
     }
@@ -625,6 +640,22 @@ public class exercises {
 
     public void setCheckHide(Boolean checkHide) {
         this.checkHide = checkHide;
+    }
+
+    public Boolean getShowInputHide() {
+        return showInputHide;
+    }
+
+    public void setShowInputHide(Boolean showInputHide) {
+        this.showInputHide = showInputHide;
+    }
+
+    public Boolean getShowOutputHide() {
+        return showOutputHide;
+    }
+
+    public void setShowOutputHide(Boolean showOutputHide) {
+        this.showOutputHide = showOutputHide;
     }
 
 }

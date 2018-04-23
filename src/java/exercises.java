@@ -363,10 +363,6 @@ public class exercises {
                         }
                         showOutputHide = true;
                     }
-                    System.out.println(correct);
-                    System.out.println("Does the output contents equal compareString? " + output.contentEquals(compareString));
-                    System.out.println("Output: " + output.contains(compareString));
-                    System.out.println("Compare String: " + compareString);
 
                 }
                 compile += "\ncommand>\n";

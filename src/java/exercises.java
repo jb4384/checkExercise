@@ -114,7 +114,6 @@ public class exercises {
                     .filter(file -> file.getName().startsWith(startsWith))
                     .collect(Collectors.toList());
         } catch (IOException ex) {
-            System.out.println("failed");
         }
     }
 
@@ -156,8 +155,6 @@ public class exercises {
         output = "";
         input = "";
         inputDisplay = "";
-        System.out.println("update file info");
-        System.out.println();
         buildFiles("gradeexercise/", header1);
         files.forEach((File file) -> {
             String fileName = file.getAbsolutePath();
@@ -166,7 +163,6 @@ public class exercises {
                 cntn = false;
             }
             if (cntn) {
-                System.out.println(fileName);
                 parseFile(fileName);
                 if (fileName.endsWith("output")) {
                     if (!output.isEmpty()) {
@@ -195,9 +191,6 @@ public class exercises {
             }
 
         });
-        System.out.println("output: " + output);
-        System.out.println("input: " + input);
-        System.out.println("input display: " + inputDisplay);
         if (input.isEmpty()) {
             hide = false;
             checkHide = true;
@@ -218,10 +211,8 @@ public class exercises {
                     fileInfo += line;
                 });
             } catch (IOException e) {
-                System.out.println(e.getMessage());
             }
         } else {
-            System.out.println("Invalid file program build - " + fileName);
         }
     }
 
@@ -235,8 +226,6 @@ public class exercises {
     }
 
     private void purgeDirectory(File dir) {
-        System.out.println("purge directory");
-        System.out.println(Arrays.toString(dir.listFiles()));
         for (File file : dir.listFiles()) {
             file.delete();
         }
@@ -292,8 +281,9 @@ public class exercises {
 //#################################################################################################################################
 
     public void checkProgram() {
-        System.out.println("checking the program");
-        if (!output.isEmpty()) output = output.replaceAll("\n","#");
+        if (!output.isEmpty()) {
+            output = output.replaceAll("\n", "#");
+        }
         compareString = "";
         matches = true;
         //Build program first
@@ -317,15 +307,11 @@ public class exercises {
                         .filter(file -> file.getName().endsWith("output"))
                         .collect(Collectors.toList());
                 files.forEach((File file) -> {
-                    System.out.println("inside comparator");
                     String outputComp = file.getAbsolutePath();
-                    System.out.println("outputComp: "+outputComp);
                     Boolean cntn = true;
                     if (!header1.endsWith("Extra") && outputComp.contains("Extra")) {
                         cntn = false;
                     }
-                    System.out.println("cntn: "+cntn);
-                    System.out.println("matches: "+matches);
                     if (cntn && matches) {
                         try {
                             String outFileName = file.getName();
@@ -363,9 +349,16 @@ public class exercises {
                         }
                     }
                 });
-                matches = output.equals(compareString);
+                String text = output.replaceAll("#", "");
+                if (text.matches("[0-9]+")) {
+                    String testComp[] = output.split("#");
+                    for (int i = 0; i < testComp.length; i++){
+                        if (!compareString.contains(testComp[i])) matches = false;
+                    }
+                } else {
+                    matches = output.equals(compareString);
+                }
             } else {
-                System.out.println(compiler.error);
                 matches = false;
             }
         } catch (IOException ex) {
@@ -384,9 +377,8 @@ public class exercises {
             output = output.replaceAll("#", "\n");
             resultHide = false;
             showOutputHide = true;
-            
+
         }
-        System.out.println(correct);
     }
 
     private Output compileProgram() {

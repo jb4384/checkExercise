@@ -135,14 +135,6 @@
                 });
 
                 textarea.val(editor.getSession().getValue());
-
-                // Editor for result, just for display
-                /*var editorForResult = ace.edit("editorForResult");
-                editorForResult.setTheme("ace/theme/chrome");
-                editorForResult.getSession().setMode("ace/mode/c");
-                editorForResult.renderer.setShowGutter(false);
-                editorForResult.setReadOnly(true);*/
-                //            editorForResult.getSession().setUseWrapMode(true);
             });
         </script>
     </h:head>
@@ -191,6 +183,18 @@
                 </h:panelGroup>
                 <!--This outputLabel holds the string if the exercise is correct or not.-->
                 <h:outputLabel rendered="#{exercises.appearWhenAutomaticCheck}" style="font-weight: bold;"> #{exercises.correct}</h:outputLabel>
+                <!--The next 3 outputText renders if the result is incorrect.
+                This outputText holds the string of the current input and does
+                not render if there is no input.-->
+                <h:outputText rendered="#{exercises.showInputHide}" style="background-color: red; color: white" value="Input for the Test" />
+                <h:inputTextarea readonly="true"  rendered="#{exercises.showInputHide}" style="background-color: gainsboro; width:575px; margin-top:-10px; width:100%; margin: 0 auto;" value="#{exercises.input}" />
+                <!--This outputText holds the string of the user's output.-->
+                <h:outputText rendered="#{exercises.showOutputHide}" style="background-color: red; color: white" value="Your Output" />
+                <h:inputTextarea readonly="true"  rendered="#{exercises.showOutputHide}" style="background-color: gainsboro; width:575px; margin-top:-10px; width:100%; margin: 0 auto;" value="#{exercises.compareString}" />
+                <!--This outputText holds the string of the correct output.-->
+                <h:outputText rendered="#{exercises.showOutputHide}" style="background-color: red; color: white" value="The Correct Output" />
+                <h:inputTextarea readonly="true"  rendered="#{exercises.showOutputHide}" style="background-color: gainsboro; width:575px; margin-top:-10px; width:100%; margin: 0 auto;" value="#{exercises.output}" />
+
                 <!--This inputTextarea is to hold the results from the compiler-->
                 <h:inputTextarea rendered="#{exercises.resultHide}" readonly="true" style="text-align: left; font-family: courier; width:100%; height:200px; font-weight: bold; margin: 0 auto;
                                  font-size: 90%; color: black; background-color: white; border: 1px solid; border-color: #f6912f;" value = "#{exercises.compile}" />

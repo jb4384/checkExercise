@@ -350,6 +350,7 @@ public class exercises {
                     }
                 });
                 String text = output.replaceAll("#", "");
+                text = text.replaceAll(".", "");
                 if (text.matches("[0-9]+")) {
                     String testComp[] = output.split("#");
                     for (int i = 0; i < testComp.length; i++){

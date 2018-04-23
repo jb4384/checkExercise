@@ -382,7 +382,7 @@ public class exercises {
             correct = "Your program is incorrect.";
             compareString = compareString.replaceAll("#", "\n");
             output = output.replaceAll("#", "\n");
-            resultHide = true;
+            resultHide = false;
             showOutputHide = true;
             
         }
